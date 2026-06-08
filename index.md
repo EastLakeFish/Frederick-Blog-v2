@@ -3,13 +3,13 @@
 layout: home
 
 hero:
-  name: "Frederick's Blog"
-  text: "A personal blog where I release latest updates."
-  tagline: My great project tagline
+  name: "EastLakeFish"
+  text: "Code & Life"
+  tagline: Notes, ideas and latest updates.
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: Meet EastLakeFish
+      link: /meet-me
     - theme: alt
       text: API Examples
       link: /api-examples
