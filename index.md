@@ -11,8 +11,8 @@ hero:
       text: Meet EastLakeFish
       link: /meet-me
     - theme: alt
-      text: API Examples
-      link: /api-examples
+      text: Explore Contents
+      link: /contents
 
 features:
   - title: Feature A
@@ -22,4 +22,3 @@ features:
   - title: Feature C
     details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
 ---
-

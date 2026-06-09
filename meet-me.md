@@ -2,7 +2,7 @@
 title: Meet EastLakeFish
 description: About Yang, a.k.a. EastLakeFish
 
-# disable navigation buttons
+layout: doc
 prev: false
 next: false
 
@@ -16,7 +16,7 @@ next: false
 # About Me
 
 Hi, I'm Yang.
-I received my B.Eng. degree in 2025, and am now working towards a doctoral degree at Wuhan University, China.
+I received my B.Eng. degree in 2025, and am now working towards a doctoral degree.
 My interests include image processing, optimization, and a wide range of topics in machine learning.
 
 Currently, I'm exploring the design of efficient neural structures with minimal parameter usage and computational overhead.
@@ -27,25 +27,28 @@ This work is published as a conference paper at ICML 2026.
 I also enjoy building practical tools and systems, from embedded devices to automatic workflows.
 This website serves as a platform where I can share my thoughts and latest updates with others.
 
-**Links.** Feel free to reach out if you'd like to discuss!
+<div class="contact-links">
+  <div><strong> Feel free to reach out if you'd like to discuss!</strong></div>
+  <div class="contact-group">
+    <strong>Email:</strong>
+    <a href="mailto:me@eastlakefish.com" class="email-link">
+      <img src="/icons/logo.svg" width="18" class="icon"> Personal
+    </a>
+    <a href="mailto:frederickyang@gmail.com" class="email-link">
+      <img src="/icons/gmail.svg" width="18" class="icon"> GMail
+    </a>
+  </div>
 
-<table>
-<tr>
-<td><b>Email</b></td>
-<td><img src="/icons/logo.svg" width="18"></td>
-<td><a href="mailto:me@frederickyang.com">Personal</a></td>
-<td><img src="/icons/whu.svg" width="18"></td>
-<td><a href="mailto:frederick_yang@whu.edu.cn">Work</a></td>
-<td><img src="/icons/gmail.svg" width="18"></td>
-<td><a href="mailto:frederickyang@gmail.com">GMail</a></td>
-</tr>
-<tr>
-<td><b>Professional</b></td>
-<td><img src="/icons/github.svg" width="18"></td>
-<td><a href="https://github.com/EastLakeFish">GitHub</a></td>
-<td><img src="/icons/orcid.svg" width="18"></td>
-<td><a href="https://orcid.org/my-orcid?orcid=0009-0003-9227-7241">ORCID</a></td>
-<td><img src="/icons/googlescholar.svg" width="18"></td>
-<td><a href="https://scholar.google.com/citations?user=s2li504AAAAJ">Scholar</a></td>
-</tr>
-</table>
+  <div class="contact-group">
+    <strong>Links:</strong>
+    <a href="https://github.com/EastLakeFish" class="social-link">
+      <img src="/icons/github.svg" width="18" class="icon"> GitHub
+    </a>
+    <a href="https://orcid.org/my-orcid?orcid=0009-0003-9227-7241" class="social-link">
+      <img src="/icons/orcid.svg" width="18" class="icon"> ORCID
+    </a>
+    <a href="https://scholar.google.com/citations?user=s2li504AAAAJ" class="social-link">
+      <img src="/icons/googlescholar.svg" width="18" class="icon"> Scholar
+    </a>
+  </div>
+</div>
