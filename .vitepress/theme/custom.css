@@ -1,0 +1,55 @@
+/* Main */
+
+html,
+body {
+  min-height: 100%;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.VPContent {
+  flex: 1;
+}
+
+/* Footer (hide horizontal line) */
+
+.VPFooter {
+  border-top: 0 !important;
+}
+
+.VPFooter .container {
+  border-top: 0 !important;
+}
+
+/* Custom Blocks */
+
+.vp-doc .custom-block a {
+  color: gray;
+  font-weight: bold;
+}
+
+.vp-doc .custom-block a:hover {
+  color: black;
+}
+
+.dark .custom-block a:hover {
+  color: white;
+}
+
+/* Default Text */
+
+.vp-doc a {
+  color: black;
+}
+
+.vp-doc a:hover {
+  color: gray;
+}
+
+.dark .vp-doc a {
+  color: white;
+}

@@ -1,0 +1,79 @@
+/* Lightbox */
+
+.vp-doc figure img {
+  cursor: zoom-in;
+}
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.85);
+  /* background: rgba(0,0,0,0.85); */
+
+  backdrop-filter: blur(4px);
+
+  cursor: zoom-out;
+}
+
+.lightbox-image {
+  max-width: 95vw;
+  max-height: 95vh;
+
+  border-radius: 8px;
+
+  box-shadow:
+    0 0 40px rgba(255,255,255,0.4);
+
+  animation: lightbox-in 0.2s ease;
+}
+
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* FigCaption in Preview */
+
+.lightbox-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  max-width: 90vw;
+  max-height: 95vh;
+}
+
+.lightbox-content img {
+  max-width: 80vw;
+  max-height: 80vh;
+  margin-bottom: 2rem;
+}
+
+.lightbox-content figcaption {
+  margin-top: 1rem;
+  max-width: 100%;
+
+  color: black;
+  background: transparent;
+  border: none;
+
+  border-top: 1px solid rgba(0, 0, 0, 0.25);
+  padding-top: 2rem;
+
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.8;
+}

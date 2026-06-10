@@ -1,0 +1,105 @@
+/* Figures */
+
+.vp-doc figure {
+  margin: 2.5rem auto;
+  padding: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--vp-c-bg-soft); 
+  border: 1px solid var(--vp-c-gutter);
+  border-radius: 12px;
+  overflow: hidden; 
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.5s, border-color 0.5s;
+}
+
+.vp-doc figure:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.vp-doc figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.vp-doc figcaption {
+  padding: 1.25rem 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--vp-font-family-base);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--vp-c-text-2);
+  background-color: var(--vp-c-bg);
+  border-top: 1px solid var(--vp-c-gutter);
+  text-align: left;
+}
+
+.vp-doc figcaption strong {
+  color: var(--vp-c-text-1);
+  font-weight: 600;
+}
+
+.vp-doc figcaption a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.vp-doc figcaption a:hover {
+  color: var(--vp-c-brand-2);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+
+/* Dark Mode */
+
+.vp-doc .dark figure {
+  background-color: white;  /* default color */
+  /* background-color: var(--vp-c-bg-soft); */
+  border-color: var(--vp-c-gutter);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.vp-doc .dark figure:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.vp-doc .dark figcaption {
+  background-color: var(--vp-c-bg-alt);
+  border-top-color: var(--vp-c-gutter);
+}
+
+/* Medium Sized */
+
+.vp-doc figure.fig-md {
+  width: 70%;
+}
+
+.vp-doc figure.fig-sm {
+  width: 40%
+}
+
+.vp-doc figure.fig-left {
+  float: left;
+  margin: 1rem 2rem 1.5rem 0;
+  width: 40%
+}
+
+.vp-doc figure.fig-right {
+  float: right;
+  margin: 1rem 0 1.5rem 2rem;
+  width: 40%
+}
+
+.vp-doc::after {
+  content: "";
+  clear: both;
+  display: table;
+}

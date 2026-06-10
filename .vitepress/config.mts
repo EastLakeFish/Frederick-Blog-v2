@@ -9,6 +9,10 @@ export default defineConfig({
     ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }]
   ],
 
+  markdown: {
+    math: true
+  },
+
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
 
@@ -25,6 +29,10 @@ export default defineConfig({
 
     sidebar: [
       {
+        text: 'Navigate',
+        link: '/contents'
+      },
+      {
         text: 'Notes',
         items: [
           { 
@@ -32,7 +40,8 @@ export default defineConfig({
             items: [
               { text: 'Compressed ImageNet', link: '/notes/machine-learning/compressed-imagenet' },
               { text: 'Parallel Training', link: '/notes/machine-learning/parallel-training' },
-            ]
+            ],
+            link: "/notes/machine-learning/index",
           },
         ]
       },
@@ -41,7 +50,7 @@ export default defineConfig({
         items: [
           { text: 'Photography', link: '/toc/photography' },
         ]
-      }
+      },
     ],
 
     socialLinks: [

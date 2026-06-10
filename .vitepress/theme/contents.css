@@ -1,0 +1,60 @@
+/* Tree-Style Link List */
+
+.tree-toc {
+  font-size: normal;
+  line-height: 1.45;
+  color: lightgray;
+  margin: 1rem 0 0 2rem;
+  padding: 0;
+  flex-direction: column;
+}
+
+.tree-toc span.topic {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.tree-toc ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.tree-toc li {
+  margin: 0;
+  padding: 0;
+  line-height: 1.45;
+}
+
+.tree-toc a {
+  color: darkgray;
+  text-decoration: none;
+}
+
+.tree-toc a:hover {
+  color: black;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.dark .tree-toc a:hover {
+  color: white;
+}
+
+/* Normal Text */
+
+.tree-toc .series {
+  color: rgba(80,80,80);
+  font-size: large;
+  font-weight: bold;
+}
+
+.tree-toc .series-desc {
+  color: rgba(80,80,80);
+  font-size: larger;
+  font-weight: normal;
+}
+
+.dark .tree-toc .series {
+  color: white;
+}
