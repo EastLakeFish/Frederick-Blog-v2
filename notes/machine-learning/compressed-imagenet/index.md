@@ -5,7 +5,7 @@ description: Introduces ImageNet sharding and compression
 prev: false
 next: {
     text: "Parallel Training",
-    link: "/notes/machine-learning/parallel-training/index"
+    link: "../parallel-training/index"
 }
 
 references:
@@ -25,7 +25,10 @@ references:
 ImageNet has been one of the standard benchmark datasets that are frequently used in computer vision tasks.
 However, it is also notorious for its size - over one million training samples, taking up approximately 140-160GB of storage.
 This makes ImageNet extremely heavy for many training pipelines.
-In this article, we slim down ImageNet through sharding, making it easy to distribute and suitable for DNN training.
+In addition, the raw training set has nested tars, making it difficult to shuffle without extracting the files.
+And if you extract them, randomly accessing these files will become another bottleneck on the filesystem side.
+
+In this article, we slim down ImageNet through sharding, making it easy to access, distribute, and suitable for DNN training.
 We also provide a script for global shuffling as an example of using the sharded dataset.
 The programs and examples are written in Python.
 
@@ -57,7 +60,7 @@ This processes use multiple working threads.
 
 The official ImageNet data are provided in tar files.
 You can download these files from the official [website](https://www.image-net.org/index.php).
-Take ILSVRC 2012 as example, we need the following files:
+Take ILSVRC 2012 as an example, we need the following files:
 
 |File Name|Size|
 |-|-|

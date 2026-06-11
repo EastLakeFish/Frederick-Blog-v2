@@ -17,6 +17,6 @@ next: false
 Accelerate ImageNet training.
 </span><br>
     ├── <a href="/notes/machine-learning/compressed-imagenet/index">Compressed ImageNet</a><br>
-    └── <a href="/notes/machine-learning/parallel-training/index">Parallel Training</a>
+    └── <a href="/notes/machine-learning/parallel-training/index">Parallel Training with PyTorch</a>
 
 </div>
