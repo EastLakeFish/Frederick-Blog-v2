@@ -15,6 +15,10 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.5s, border-color 0.5s;
 }
 
+.vp-doc figure.my-logo {
+  all: unset;  /* meet-me.md */
+}
+
 .vp-doc figure:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);

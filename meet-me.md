@@ -8,7 +8,7 @@ next: false
 
 ---
 
-<figure>
+<figure class="my-logo">
 <img src="/icons/logo.svg" alt="Logo" style="max-width: 200px; width: 10vw; min-width: 50px;margin-bottom: 3vw;">
 </figure>
 

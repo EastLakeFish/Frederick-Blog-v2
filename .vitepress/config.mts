@@ -10,7 +10,7 @@ export default defineConfig({
   ],
 
   markdown: {
-    math: true
+    math: true,
   },
 
   themeConfig: {
@@ -24,13 +24,22 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'About', link: '/meet-me' },
-      { text: 'Contents', link: '/contents' },
+      { text: 'Navigate', link: '/contents' },
+      { text: 'License', link: '/license' },
     ],
 
     sidebar: [
       {
         text: 'Navigate',
-        link: '/contents'
+        link: '/contents',
+      },
+      {
+        text: 'About',
+        link: '/meet-me',
+      },
+      {
+        text: 'License',
+        link: '/license',
       },
       {
         text: 'Notes',
