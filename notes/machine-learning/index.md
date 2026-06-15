@@ -17,7 +17,7 @@ next: false
 Accelerate ImageNet training.
 </span><br>
     ├── <a href="/notes/machine-learning/sharding-imagenet/index">Sharding ImageNet</a><br>
-    ├── <a href="/notes/machine-learning/efficient-imagenet/index">Efficient Datasets</a><br>
+    ├── <a href="/notes/machine-learning/efficient-imagenet/index">Efficient ImageNet</a><br>
     └── <a href="/notes/machine-learning/parallel-training/index">Parallel Training with PyTorch</a>
 
 </div>
