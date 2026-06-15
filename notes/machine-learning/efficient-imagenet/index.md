@@ -15,6 +15,8 @@ next: {
 
 # Efficient ImageNet
 
+*Created on June 15, 2026*
+
 :::info **This article belongs to series** [*Efficient ImageNet*](../index.md)
 :::
 
@@ -43,3 +45,59 @@ for item in preindexed:
         img_bytes = tar.read(item["size"])
     image = Image.open(io.BytesIO(img_bytes))
 ```
+
+The above is the general idea of building an efficient ImageNet dataset based on sharded data.
+In fact, this idea can also be applied to the raw ImageNet data (i.e., nested tar files), which is simply less direct and requires more dataset-specific implementations.
+
+## Implementation
+
+To deal with arbitrary sharded datasets, we don't assume we have the sharder file (see [previous](../sharding-imagenet/index) note) and start with data structure inspection.
+We assume the sharded dataset has the following structure:
+
+```text
+ROOT
+  ├── train
+  │     └── shard_0.tar, ...
+  │           └── <label>.<filename>.<suffix>
+  └── val
+        └── shard_0.tar, ...
+              └── <label>.<filename>.<suffix>
+```
+
+We still assign the shards to multiple worker processes to pre-indexing data.
+Each data block corresponds to one image, which is in the following structure:
+
+```python
+{
+    "shard": shard_path,
+    "label": mem.name.split(".")[0],
+    "offset": mem.offset_data,
+    "size": mem.size,
+}
+```
+
+Through multiprocessing, iterating the whole ImageNet dataset typically uses less than 20 seconds.
+
+Next, we implement `__getitem__` and `__len__` so that the dataset can work with PyTorch `DataLoader`.
+In particular, we employ `torchvision.io.decode_image` to directly decode image bytes in memory:
+
+```python
+buf = torch.frombuffer(img_bytes, dtype=torch.uint8)
+img = torchvision.io.decode_image(buf, mode="RGB")  # if the sharder uses RGB
+```
+
+## Results
+
+Setting `num_workers` to 8 for `DataLoader`, we evaluate the performance of our efficient dataset by running 10 warmup batches and 500 <q>training</q> batches (loading data and then do nothing).
+The results are shown as follows:
+
+|Batch Size|Samples/Sec|Batches/Sec|Avg Speed|
+|-|-|-|-|
+|256|21112.03|82.47|0.047s/sample|
+
+## Source Files
+
+<a href="/docs/source/?file=machine-learning/efficient-imagenet/efficient_imagenet.py" class="source-link">
+<span class="file">efficient_imagenet.py</span>
+<span class="desc">An efficient ImageNet dataset for sharded data (single-card training).</span>
+</a>

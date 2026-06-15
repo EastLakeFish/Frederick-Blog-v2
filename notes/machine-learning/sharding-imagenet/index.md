@@ -30,11 +30,6 @@ references:
     <span class="date">2026-06-15</span>
     <span class="message">Caching and encoding labels in filenames.</span>
   </div>
-
-  <div class="update-note">
-    <span class="date">2026-06-11</span>
-    <span class="message">Initial commit.</span>
-  </div>
 </div>
 
 ImageNet has been one of the standard benchmark datasets that are frequently used in computer vision tasks.

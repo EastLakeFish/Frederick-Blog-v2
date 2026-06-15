@@ -23,7 +23,7 @@ An important lesson taught by the CPU bottleneck is that part of the preprocessi
 Take ImageNet for example, since `DataLoader` generally does not hold old batch cache, images need to be resized at the beginning of every batch.
 This leads to 1.28 million resize operations per epoch, and 128 million if you were to train for 100 epochs, while these operations are totally avoidable.
 
-For compressing ImageNet and avoiding resizing during training, please refer to the [previous](../compressed-imagenet/index.md) note.
+For compressing ImageNet and avoiding resizing during training, please refer to the [previous](../sharding-imagenet/index.md) note.
 In this article, we will design utilities for parallel training on ImageNet with techniques brought by PyTorch Distributed Data Parallel (DDP), which is designed for synchronizing data (especially parameters and their gradients) across different processes during training.
 You can find an official tutorial on DDP [here](https://docs.pytorch.org/tutorials/intermediate/ddp_tutorial.html).
 
@@ -107,18 +107,3 @@ def process(rank: int):
     model = nn.Module().to(f"cuda:{rank}")
     ddp_model = DDP(model, device_ids=[rank])
 ```
-
-## Implementation
-
-We will implement a training script based on DDP and sharded ImageNet dataset (see [previous](../compressed-imagenet/index) note).
-The major components are:
-
-- **Data Loader:** Adapt sharded ImageNet to PyTorch training with multi-process support.
-- **Trainer:** Wrap the target model with DDP and train on two graphics cards.
-- **Validator:** Validate model performance on a single GPU.
-- **Logger:** Log everything.
-
-These components are arranged in the order of initialization, data loading, training and validating.
-
-### Data Loader
-
