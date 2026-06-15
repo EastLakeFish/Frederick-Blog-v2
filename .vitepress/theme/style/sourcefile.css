@@ -1,0 +1,116 @@
+/* Source File Block */
+
+.source-file {
+  margin: 1.75rem 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--vp-code-block-bg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.source-file-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-soft);
+
+  font-size: 0.85rem;
+}
+
+.source-file-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-family: var(--vp-font-family-mono);
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.source-file-meta {
+  flex: 0 0 auto;
+
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
+
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.75rem;
+  color: var(--vp-c-text-2);
+  background: var(--vp-c-bg);
+}
+
+.source-file-body {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.source-file-body pre {
+  margin: 0 !important;
+  padding: 1rem 1.1rem !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+
+  white-space: pre-wrap !important;
+  word-break: normal;
+}
+
+.source-file-body code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.86rem;
+  line-height: 1.7;
+}
+
+/* Mobile: preserve code layout and use horizontal scrolling */
+
+@media (max-width: 768px) {
+  .source-file {
+    margin: 1.25rem 0;
+    border-radius: 12px;
+  }
+
+  .source-file-header {
+    padding: 0.65rem 0.85rem;
+  }
+
+  .source-file-body {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .source-file-body pre {
+    padding: 0.9rem 0.95rem !important;
+
+    white-space: pre !important;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .source-file-body code {
+    font-size: 0.82rem;
+    line-height: 1.65;
+  }
+}
+
+/* Source File Links */
+
+.sourcefile {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.source-file-missing {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid var(--vp-c-danger-2);
+  border-radius: 12px;
+  color: var(--vp-c-danger-1);
+  background: var(--vp-c-danger-soft);
+}

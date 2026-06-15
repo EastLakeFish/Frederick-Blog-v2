@@ -53,3 +53,15 @@ body {
 .dark .vp-doc a {
   color: white;
 }
+
+/* Source and Reference */
+
+.vp-doc a.source {
+  color: #195FAA;
+  text-decoration: underline;
+}
+
+.vp-doc a.source:hover {
+  color: #1a73e8;
+  text-decoration: underline;
+}

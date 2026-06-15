@@ -4,8 +4,8 @@ description: Introduces ImageNet sharding and compression
 
 prev: false
 next: {
-    text: "Parallel Training",
-    link: "../parallel-training/index"
+    text: "Efficient ImageNet",
+    link: "../efficient-imagenet/index"
 }
 
 references:
@@ -17,10 +17,25 @@ references:
 
 ---
 
-# Compressed ImageNet
+# Sharding ImageNet
+
+*Created on June 11, 2026.*
 
 ::: info **This article belongs to series** [*Efficient ImageNet*](../index.md)
 :::
+
+<div class="update-notes">
+  <h1>Update Notes</h1>
+  <div class="update-note">
+    <span class="date">2026-06-15</span>
+    <span class="message">Caching and encoding labels in filenames.</span>
+  </div>
+
+  <div class="update-note">
+    <span class="date">2026-06-11</span>
+    <span class="message">Initial commit.</span>
+  </div>
+</div>
 
 ImageNet has been one of the standard benchmark datasets that are frequently used in computer vision tasks.
 However, it is also notorious for its size - over one million training samples, taking up approximately 140-160GB of storage.
@@ -32,10 +47,10 @@ In this article, we slim down ImageNet through sharding, making it easy to acces
 We also provide a script for global shuffling as an example of using the sharded dataset.
 The programs and examples are written in Python.
 
-The sharder code is open-source under [GNU GPL v2.0](/license) and you can download <a href="./assets/sharder.py" download>here</a>.
 Due to ImageNet restrictions, a copy of the processed data will not be provided on this page.
+You can find our source files at the <a href="#source-files">bottom</a> of this page.
 
-## Sharding
+## Implementation
 
 Sharding means to partition a large dataset into smaller chunks (e.g., tars).
 Compared with reading tens of thousands of individual files, reading those chunks can be extremely fast, because each chunk is considered a single file from the filesystem perspective.
@@ -120,7 +135,7 @@ Classes: 1000 | Train: 1281167 | Val: 50000 | Elapsed: 636s.
 The ImageNet sharder employs multiple workers to shard ImageNet efficiently.
 Its framework is shown in <a href="#fig:sharder">Fig. 2</a>.
 
-<figure class="fig-md" style="width: 90%" id="fig:sharder">
+<figure class="fig" id="fig:sharder">
 <img src="./assets/sharder.svg" alt="Sharder">
 <figcaption>
 <strong>Fig. 2.</strong>
@@ -139,6 +154,16 @@ The processed image bytes, along with their labels (for training set), are gathe
 
 Through sharding, the ImageNet dataset can be compressed into shard files of only 14GB, while the original data take up approximately 150GB on disk, yielding a compression rate of 90%.
 On HDD with I/O bandwidth 210MB/s, a sharder with 16 workers takes only 13 minutes to process the whole dataset.
+On SSD, it takes approximately 8 minutes.
+
+<figure class="fig-md">
+<img src="./assets/results.png" alt="Sharding Results">
+<figcaption>
+<strong>Fig. 3.</strong>
+Generated files in shards.
+Labels (shadowed in yellow) are encoded in filenames.
+</figcaption>
+</figure>
 
 ## Shuffling
 
@@ -158,8 +183,39 @@ We only shuffle on the training set.
 Before global shuffling, it is important to build up a database to store image information.
 To achieve that, we still employ multiple workers to iterate over different shards and gather image information within those shards.
 The framework to build up this database is similar to the sharder shown in <a href="#fig:sharder">Fig. 2</a>.
-You can download the code <a href="./assets/shuffle.py" download>here</a>.
 
 On SSD, the script takes approximately 30 seconds to shuffle the sharded data using a single worker, about 15 seconds with 2 workers, and about 7 seconds with 4 or more workers.
 
-<references/>
+**Example.** First 5 samples in a shuffled file list:
+``` python
+# pattern: shard_id/label.filename (with suffix)
+# train set
+[
+    '112/657.n03773504_14704.JPEG', 
+    '16/883.n04522168_6421.JPEG', 
+    '119/704.n03891332_259.JPEG', 
+    '110/640.n03717622_8920.JPEG', 
+    '37/123.n01984695_15603.JPEG'
+]
+
+# val set
+[
+    '0/660.ILSVRC2012_val_00046108.JPEG', 
+    '1/530.ILSVRC2012_val_00046901.JPEG', 
+    '3/431.ILSVRC2012_val_00046599.JPEG', 
+    '2/268.ILSVRC2012_val_00038956.JPEG', 
+    '0/660.ILSVRC2012_val_00031091.JPEG'
+]
+```
+
+## Source Files
+
+<a href="/docs/source/?file=machine-learning/sharding-imagenet/sharder.py" class="source-link">
+<span class="file">sharder.py</span>
+<span class="desc">ImageNet sharding pipeline implementation.</span>
+</a>
+
+<a href="/docs/source/?file=machine-learning/sharding-imagenet/shuffle.py" class="source-link">
+<span class="file">shuffle.py</span>
+<span class="desc">A shuffler for sharded ImageNet data.</span>
+</a>

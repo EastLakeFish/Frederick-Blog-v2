@@ -1,9 +1,18 @@
 import { defineConfig } from 'vitepress'
+import { fileURLToPath, URL } from 'node:url'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "Yang's Blog",
+  title: "EastLakeFish",
   description: "A personal blog where I release latest updates.",
+
+  vite: {
+    resolve: {
+      alias: {
+        '/docs': fileURLToPath(new URL('../', import.meta.url))
+      }
+    }
+  },
 
   head: [
     ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }]
@@ -47,7 +56,8 @@ export default defineConfig({
           { 
             text: 'Machine Learning',
             items: [
-              { text: 'Compressed ImageNet', link: '/notes/machine-learning/compressed-imagenet' },
+              { text: 'Sharding ImageNet', link: '/notes/machine-learning/sharding-imagenet' },
+              { text: 'Efficient ImageNet', link: '/notes/machine-learning/efficient-imagenet' },
               { text: 'Parallel Training', link: '/notes/machine-learning/parallel-training' },
             ],
             link: "/notes/machine-learning/index",

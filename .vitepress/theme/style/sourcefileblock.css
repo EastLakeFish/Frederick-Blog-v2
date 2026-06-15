@@ -1,0 +1,52 @@
+/* Source File Block */
+
+a.source-link {
+  text-decoration: none;
+}
+
+.source-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  margin: 1rem 0;
+  padding: 0.9rem 1rem;
+
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+
+  background: var(--vp-c-bg-soft);
+
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+
+  text-decoration: none;
+}
+
+.source-link:hover {
+  border-color: var(--vp-c-brand-1);
+  transform: translateY(-1px);
+}
+
+.source-link span {
+  text-decoration: none;
+}
+
+.source-link span.file {
+  font-size: large;
+  margin-bottom: .5rem;
+  color: black;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.source-link span.file::before {
+  content: "📄 ";
+}
+
+.source-link span.desc {
+  font-size: 0.92rem;
+  color: var(--vp-c-text-2);
+  text-decoration: none;
+}

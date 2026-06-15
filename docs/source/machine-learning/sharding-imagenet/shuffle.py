@@ -44,7 +44,8 @@ class ImageNetShuffle:
         self.wnid2label = self._wnid2label()
         self.shard2worker, self.worker2shard = self._assign_shards()
         
-        self.train_imgs = self._cache_train_imgs()
+        self.train_imgs = self._cache_imgs("train")
+        self.val_imgs = self._cache_imgs("val")
     
     @staticmethod
     def load_devkit(path: Path) -> list[int]:
@@ -101,9 +102,8 @@ class ImageNetShuffle:
         out_queue.put(None)
     
     @staticmethod
-    def _collect_shard_images(in_queue: Queue, num_workers: int) -> list[str]:
+    def _collect_shard_images(pbar: tqdm, in_queue: Queue, num_workers: int) -> list[str]:
         counter, images = 0, []
-        pbar = tqdm(total=1_281_167, desc="Building cache")
         while True:
             d = in_queue.get()
             if d is None:
@@ -115,17 +115,22 @@ class ImageNetShuffle:
             pbar.update()
         return images
     
-    def _cache_train_imgs(self) -> list[str]:
-        queue, num_workers = Queue(), self._num_workers("train")
-        batches = split_list(list(self.shard_paths["train"].items()), num_workers)
+    def _cache_imgs(self, split: str) -> list[str]:
+        img_count = {
+            "train": 1_281_167,
+            "val": 50_000,
+        }
+        queue, num_workers = Queue(), self._num_workers(split)
+        batches = split_list(list(self.shard_paths[split].items()), num_workers)
         inspectors = [Process(target=self._inspect_shard_images, kwargs={
             "shard_paths": batch,
             "out_queue": queue,
         }) for batch in batches]
         for ins in inspectors:
             ins.start()
-        cache = self._collect_shard_images(queue, num_workers)
-        print(f"Done. Cache in memory: {sys.getsizeof(cache) / (1024**2):.2f}MB")
+        pbar = tqdm(total=img_count[split], desc=f"Caching {split}", file=sys.stdout)
+        cache = self._collect_shard_images(pbar, queue, num_workers)
+        print(f"Cache for split {split} in memory: {sys.getsizeof(cache) / (1024**2):.2f}MB")
         return cache
     
     def shuffle(self) -> list[str]:
@@ -137,5 +142,8 @@ if __name__ == "__main__":
     loader = ImageNetShuffle(
         root=r"F:\ResearchProjects\Datasets\ImageNet",
         compressed_dir=r"compressed_batch=10000",
-        num_workers=1,
+        num_workers=4,
     )
+    
+    print(loader.train_imgs[:10])
+    print(loader.val_imgs[:10])

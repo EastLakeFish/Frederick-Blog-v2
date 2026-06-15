@@ -1,0 +1,47 @@
+/* Source Viewer */
+
+.source-viewer {
+  margin: 1.5rem 0;
+}
+
+.source-viewer-intro {
+  margin-bottom: 1.25rem;
+}
+
+.source-viewer-intro h1 {
+  margin: 0.75rem 0 0.5rem;
+}
+
+.source-viewer-intro p {
+  margin: 0;
+  color: var(--vp-c-text-2);
+}
+
+.source-viewer-intro code {
+  font-family: var(--vp-font-family-mono);
+  color: var(--vp-c-text-1);
+}
+
+.source-viewer-back {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0.35rem 0.65rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 5px;
+
+  color: var(--vp-c-text-2);
+  background: var(--vp-c-bg-soft);
+  cursor: pointer;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.source-viewer-back:hover {
+  color: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+}
+
+/* Support .dark */
+

@@ -24,6 +24,7 @@
   "devDependencies": {
     "@vscode/markdown-it-katex": "^1.1.2",
     "markdown-it-mathjax3": "^4.3.2",
+    "shiki": "^4.2.0",
     "vitepress": "^1.6.4"
   }
 }

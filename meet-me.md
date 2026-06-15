@@ -13,9 +13,9 @@ next: false
 </figure>
 
 
-# About Me
+# About EastLakeFish
 
-Hi, I'm Yang.
+Hi, I'm Yang, a.k.a. EastLakeFish.
 I received my B.Eng. degree in 2025, and am now working towards a doctoral degree.
 My interests include image processing, optimization, and a wide range of topics in machine learning.
 
