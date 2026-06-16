@@ -6,16 +6,57 @@ Deploy the website.
 """
 
 import argparse
+import itertools
 import subprocess
+import sys
+import threading
+import time
+
+
+def overwrite(msg, newline=False):
+    sys.stdout.write('\r' + msg)
+    if newline:
+        sys.stdout.write('\n')
+    sys.stdout.flush()
+
+
+def spinner(stop_loading, command):
+    spinner = itertools.cycle([
+        "⠋",
+        "⠙",
+        "⠹",
+        "⠸",
+        "⠼",
+        "⠴",
+        "⠦",
+        "⠧",
+        "⠇",
+        "⠏",
+    ])
+    while not stop_loading.is_set():
+        overwrite(f"{next(spinner)} {" ".join(command)}")
+        time.sleep(0.1)
 
 
 def run_command(command):
+    stop_loading = threading.Event()
+    spinner_thread = threading.Thread(
+        target=spinner,
+        args=(stop_loading, command)
+    )
+    spinner_thread.start()
+    msg = f"[{command}]"
+    
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True)
-        return f"[{command}]: {result.stdout.strip()}"
+        msg = f"[{command}]\n{result.stdout.strip()}"
     except subprocess.CalledProcessError as e:
-        return f"(ERR)[{command}]\n{e.stderr.strip()}"
-    
+        msg = f"(ERR)[{command}]\n{e.stderr.strip()}"
+    finally:
+        stop_loading.set()
+        spinner_thread.join()
+        overwrite(msg, newline=True)
+        
 
 def git_commit(message):
     print("-------- GIT --------")
@@ -24,13 +65,13 @@ def git_commit(message):
         ("git", "commit", "-m", message),
         ("git", "push"),
     ):
-        print(run_command(command))
+        run_command(command)
     print("-------- GIT --------")
         
 
 def web_deploy():
     print("----- NPM DEPLOY ----")
-    print(run_command(("sudo", "npm", "run", "deploy")))
+    run_command(("sudo", "npm", "run", "deploy"))
     print("----- NPM DEPLOY ----")
 
 
