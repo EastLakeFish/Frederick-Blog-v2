@@ -15,9 +15,11 @@ import './style/sourcefileblock.css'
 import './style/sourceviewer.css'
 import './style/update-notes.css'
 
-// import functions
+// import components
 import { onMounted } from 'vue'
 import { setupLightbox } from './components/lightbox.ts'
+
+import Contents from './components/contents.vue'
 import References from './components/reference.vue'
 import SourceIndex from './components/sourceindex.vue'
 import SourceFile from './components/sourcefile.vue'
@@ -34,6 +36,7 @@ export default {
   },
 
   enhanceApp({ app }) {
+    app.component('Contents', Contents)
     app.component('References', References)
     app.component('SourceIndex', SourceIndex)
     app.component('SourceFile', SourceFile)

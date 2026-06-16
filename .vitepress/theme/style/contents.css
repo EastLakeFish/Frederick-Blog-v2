@@ -1,29 +1,22 @@
 /* Tree-Style Link List */
 
 .tree-toc {
-  font-size: normal;
+  font-size: large;
   line-height: 1.45;
   color: lightgray;
-  margin: 1rem 0 0 2rem;
+  margin-bottom: .3rem;
+  margin-left: 2rem;
   padding: 0;
   flex-direction: column;
+}
+
+.tree-toc div {
+  margin-bottom: .5rem;
 }
 
 .tree-toc span.topic {
   font-size: 20px;
   font-weight: bold;
-}
-
-.tree-toc ul {
-  list-style: none;
-  margin: 0;
-  padding-left: 1.4em;
-}
-
-.tree-toc li {
-  margin: 0;
-  padding: 0;
-  line-height: 1.45;
 }
 
 .tree-toc a {
@@ -43,15 +36,18 @@
 
 /* Normal Text */
 
+.tree-toc p {
+  margin: .2rem;
+}
+
 .tree-toc .series {
   color: rgba(80,80,80);
-  font-size: large;
   font-weight: bold;
+  margin-right: .25rem;
 }
 
 .tree-toc .series-desc {
   color: rgba(80,80,80);
-  font-size: larger;
   font-weight: normal;
 }
 

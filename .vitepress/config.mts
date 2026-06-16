@@ -60,19 +60,8 @@ export default defineConfig({
         items: [
           { 
             text: 'Machine Learning',
-            items: [
-              { text: 'Sharding ImageNet', link: '/notes/machine-learning/sharding-imagenet' },
-              { text: 'Efficient ImageNet', link: '/notes/machine-learning/efficient-imagenet' },
-              { text: 'Parallel Training', link: '/notes/machine-learning/parallel-training' },
-            ],
             link: "/notes/machine-learning/index",
           },
-        ]
-      },
-      {
-        text: 'Life',
-        items: [
-          { text: 'Photography', link: '/toc/photography' },
         ]
       },
     ],
