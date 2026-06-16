@@ -93,7 +93,7 @@ The results are shown as follows:
 
 |Batch Size|Samples/Sec|Batches/Sec|Avg Speed|
 |-|-|-|-|
-|256|21112.03|82.47|0.047s/sample|
+|256|21112.03|82.47|0.047ms/sample|
 
 ## Source Files
 

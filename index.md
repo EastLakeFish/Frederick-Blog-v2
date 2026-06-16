@@ -18,4 +18,7 @@ features:
  - title: Efficient ImageNet
    details: Train your model on ImageNet at the speed of 12 epochs/hour.
    link: /notes/machine-learning/index
+ - title: Source Files
+   details: Explore source files used in my notes here.
+   link: /sourceindex
 ---

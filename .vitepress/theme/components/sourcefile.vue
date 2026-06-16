@@ -79,7 +79,7 @@ watchEffect(async () => {
   }
 
   html.value = await codeToHtml(visibleSource.value, {
-    lang: props.lang,
+    lang: resolvedLang.value,
     theme: isDark.value ? 'github-dark' : 'github-light'
   })
 })
