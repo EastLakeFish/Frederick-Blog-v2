@@ -35,20 +35,25 @@ export default defineConfig({
       { text: 'About', link: '/meet-me' },
       { text: 'Navigate', link: '/contents' },
       { text: 'License', link: '/license' },
+      { text: 'Source Files', link: '/sourceindex' },
     ],
 
     sidebar: [
-      {
-        text: 'Navigate',
-        link: '/contents',
-      },
       {
         text: 'About',
         link: '/meet-me',
       },
       {
+        text: 'Navigate',
+        link: '/contents',
+      },
+      {
         text: 'License',
         link: '/license',
+      },
+      {
+        text: 'Source Files',
+        link: '/sourceindex',
       },
       {
         text: 'Notes',
