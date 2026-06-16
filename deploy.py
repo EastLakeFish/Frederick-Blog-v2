@@ -18,16 +18,20 @@ def run_command(command):
     
 
 def git_commit(message):
+    print("-------- GIT --------")
     for command in (
         ("git", "add", "."),
         ("git", "commit", "-m", message),
         ("git", "push"),
     ):
         print(run_command(command))
+    print("-------- GIT --------")
         
 
 def web_deploy():
+    print("----- NPM DEPLOY ----")
     print(run_command(("sudo", "npm", "run", "deploy")))
+    print("----- NPM DEPLOY ----")
 
 
 if __name__ == "__main__":
