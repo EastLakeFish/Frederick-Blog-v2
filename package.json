@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/EastLakeFish/Frederick-Blog-v2#readme",
   "devDependencies": {
+    "@types/node": "^25.9.3",
     "@vscode/markdown-it-katex": "^1.1.2",
     "markdown-it-mathjax3": "^4.3.2",
     "shiki": "^4.2.0",
