@@ -20,7 +20,7 @@ def overwrite(msg, newline=False):
     sys.stdout.flush()
 
 
-def spinner(stop_loading, command):
+def spinner(stop_loading, command_str):
     spinner = itertools.cycle([
         "⠋",
         "⠙",
@@ -34,24 +34,25 @@ def spinner(stop_loading, command):
         "⠏",
     ])
     while not stop_loading.is_set():
-        overwrite(f"{next(spinner)} {" ".join(command)}")
-        time.sleep(0.1)
+        overwrite("  ".join((next(spinner), command_str)))
+        time.sleep(0.12)
 
 
 def run_command(command):
     stop_loading = threading.Event()
+    command_str = " ".join(command)
+    msg = f"[{command_str}]"
     spinner_thread = threading.Thread(
         target=spinner,
-        args=(stop_loading, command)
+        args=(stop_loading, command_str)
     )
     spinner_thread.start()
-    msg = f"[{command}]"
     
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True)
-        msg = f"[{command}]\n{result.stdout.strip()}"
+        msg = f"{msg}\n{result.stdout.strip()}"
     except subprocess.CalledProcessError as e:
-        msg = f"(ERR)[{command}]\n{e.stderr.strip()}"
+        msg = f"(ERR){msg}\n{e.stderr.strip()}"
     finally:
         stop_loading.set()
         spinner_thread.join()
