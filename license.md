@@ -7,7 +7,8 @@ next: false
 
 # License
 
-© 2026 eastlakefish.com. All Rights Reserved.
+::: info © 2026 eastlakefish.com. All Rights Reserved.
+:::
 
 This website is licensed under multiple licenses depending on the content type.
 - **All Code Snippets and Source Files:** [GNU GPL2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
