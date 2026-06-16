@@ -21,7 +21,7 @@ references:
 
 *Created on June 11, 2026.*
 
-::: info **This article belongs to series** [*Efficient ImageNet*](../index.md)
+:::info **This article belongs to series** [*Efficient ImageNet*](/notes/machine-learning/index)
 :::
 
 <div class="update-notes">

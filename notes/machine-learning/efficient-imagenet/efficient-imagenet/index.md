@@ -17,7 +17,7 @@ next: {
 
 *Created on June 15, 2026*
 
-:::info **This article belongs to series** [*Efficient ImageNet*](../index.md)
+:::info **This article belongs to series** [*Efficient ImageNet*](/notes/machine-learning/index)
 :::
 
 While sharding makes it efficient to stream data from a large dataset, the implementation, especially for reshuffling before each epoch starts, becomes very complex.

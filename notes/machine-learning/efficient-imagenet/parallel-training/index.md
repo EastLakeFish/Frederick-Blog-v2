@@ -13,7 +13,7 @@ next: false
 
 # Parallel Training with PyTorch
 
-:::info **This article belongs to series** [*Efficient ImageNet*](../index.md)
+:::info **This article belongs to series** [*Efficient ImageNet*](/notes/machine-learning/index)
 :::
 
 Training on multiple graphics cards can be mathematically equivalent to single-card training.
