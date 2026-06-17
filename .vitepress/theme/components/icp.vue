@@ -35,7 +35,7 @@ const icpLink = 'https://beian.miit.gov.cn/';
         class="icp-info"
       >
       <span class="block">
-        ICP Filing No. {{ displayICP }}
+        {{ displayICP }}
       </span>
       <span class="block">
         {{ getCopyright(currentDomain) }}
