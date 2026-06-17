@@ -34,14 +34,18 @@ const icpLink = 'https://beian.miit.gov.cn/';
         rel="noopener noreferrer"
         class="icp-info"
       >
-      <span class="copyright">
+      <span class="block">
         ICP Filing No. {{ displayICP }}
+      </span>
+      <span class="block">
         {{ getCopyright(currentDomain) }}
       </span>
       </a>
       <span v-else class="icp-placeholder">
-        <span class="copyright">
+        <span class="block">
         <i>under development</i>
+        </span>
+        <span class="block">
         {{ getCopyright(Object.keys(ICP_CONFIG).join(', ')) }}
         </span>
       </span>
@@ -74,8 +78,8 @@ const icpLink = 'https://beian.miit.gov.cn/';
   color: var(--vp-c-text-3);
 }
 
-.copyright {
-  margin-left: 12px;
+.site-footer .block {
+  margin-left: 1rem;
   color: var(--vp-c-text-3);
   font-size: 13px;
 }
