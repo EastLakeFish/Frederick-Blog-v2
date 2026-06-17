@@ -1,6 +1,6 @@
 # README
 
-(c) 2026, frederickyang.com & eastlakefish.com. All rights reserved.
+© 2026, frederickyang.com & eastlakefish.com. All rights reserved.
 
 This repository contains the source code and content for my personal website, built with VitePress.
 
