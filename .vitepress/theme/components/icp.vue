@@ -37,17 +37,18 @@ const icpLink = 'https://beian.miit.gov.cn/';
       <span class="block">
         {{ displayICP }}
       </span>
-      <span class="block">
+      </a>
+      <span v-else class="block">
+        <i>under development</i>
+      </span>
+      <span 
+        v-if="displayICP"
+        class="block"
+      >
         {{ getCopyright(currentDomain) }}
       </span>
-      </a>
-      <span v-else class="icp-placeholder">
-        <span class="block">
-        <i>under development</i>
-        </span>
-        <span class="block">
+      <span v-else class="block">
         {{ getCopyright(Object.keys(ICP_CONFIG).join(', ')) }}
-        </span>
       </span>
     </footer>
   </ClientOnly>
