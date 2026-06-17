@@ -29,7 +29,7 @@ function fileIcon(file: string) {
       <p>
         <strong>Important:</strong>
         All our source files are licensed under GNU GPL 2.0 and are not authorized for academic use unless you cite this website.
-        For more details, please refer to <a href="/license.html" target="_blank">license</a>.
+        For more details, please refer to <a href="/license.html">license</a>.
       </p>
     </div>
 
