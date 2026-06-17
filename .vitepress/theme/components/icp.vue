@@ -1,25 +1,17 @@
 <!-- .vitepress/theme/components/icp.vue -->
 <script setup>
 import { computed } from 'vue';
+import { getCopyright } from './copyright.ts'
+import { currentDomain } from './env.ts';
 
 const ICP_CONFIG = {
   'frederickyang.com': '鄂ICP备2024070719号-1',
   'eastlakefish.com': '鄂ICP备2024070719号-2',
 };
 
-const currentDomain = computed(() => {
-  if (typeof window === 'undefined') return '';
-  return location.hostname.split('.').slice(-2).join('.');
-});
-
 const displayICP = computed(() => {
   return ICP_CONFIG[currentDomain.value] || null;
 });
-
-function getCopyright(domain) {
-    const date = new Date()
-    return "© " + date.getFullYear() + ", " + domain + ", all rights reserved."
-}
 
 const icpLink = 'https://beian.miit.gov.cn/';
 </script>

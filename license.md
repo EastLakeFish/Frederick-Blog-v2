@@ -7,7 +7,7 @@ next: false
 
 # License
 
-::: info © 2026 eastlakefish.com. All Rights Reserved.
+::: info <Copyright/>
 :::
 
 This website is licensed under multiple licenses depending on the content type.

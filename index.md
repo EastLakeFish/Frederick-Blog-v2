@@ -22,5 +22,3 @@ features:
    details: Explore source files used in my notes here.
    link: /sourceindex
 ---
-
-<ICPFooter />
