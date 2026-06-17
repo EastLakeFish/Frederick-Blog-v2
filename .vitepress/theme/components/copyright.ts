@@ -4,7 +4,7 @@ import { currentDomain } from "./env"
 
 export function getCopyright(domain: String) {
     const date = new Date()
-    return "© " + date.getFullYear() + ", " + domain + ", all rights reserved."
+    return "© " + date.getFullYear() + ", " + domain + ". All rights reserved."
 }
 
 export function getCopyrightNow() {
