@@ -25,10 +25,10 @@ export default defineConfig({
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
 
-    footer: {
-      message: '<a href="https://beian.miit.gov.cn" target="_blank">鄂ICP备2024070719号-1</a>',
-      copyright: '©2026 All rights reserved.',
-    },
+    // footer: {
+    //   message: '<a href="https://beian.miit.gov.cn" target="_blank">鄂ICP备2024070719号-1</a>',
+    //   copyright: '©2026 All rights reserved.',
+    // },
 
     nav: [
       { text: 'Home', link: '/' },
