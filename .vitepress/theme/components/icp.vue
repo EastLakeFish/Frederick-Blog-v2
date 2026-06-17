@@ -41,6 +41,9 @@ const icpLink = 'https://beian.miit.gov.cn/';
       <span v-else class="block">
         <i>under development</i>
       </span>
+
+      <span class="block">|</span>
+
       <span 
         v-if="displayICP"
         class="block"
@@ -80,7 +83,8 @@ const icpLink = 'https://beian.miit.gov.cn/';
 }
 
 .site-footer .block {
-  margin-left: 1rem;
+  margin-left: .2rem;
+  margin-right: .2rem;
   color: var(--vp-c-text-3);
   font-size: 13px;
 }
