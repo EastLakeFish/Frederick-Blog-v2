@@ -65,6 +65,10 @@ Initializing a process group in PyTorch requires three parameters `backend` `wor
 import torch
 import torch.distributed as dist
 
+# register before initialization
+os.environ['MASTER_ADDR'] = 'localhost'
+os.environ['MASTER_PORT'] = '12355'
+
 acc = torch.accelerator.current_accelerator()  # e.g., CUDA
 backend = dist.get_default_backend_for_device(acc)
 dist.init_process_group(backend, world_size=world_size, rank=rank)
@@ -107,3 +111,30 @@ def process(rank: int):
     model = nn.Module().to(f"cuda:{rank}")
     ddp_model = DDP(model, device_ids=[rank])
 ```
+
+Let $\{g_i\}_{i=1}^N$ denote $N$ gradients computed by $N$ processes.
+The allreduce operator generally obtains the final update direction by taking the average of those gradients:
+$$
+g = {\small\sum_{i=1}^N\space} g_i.
+$$
+Mathematically, this is equivalent to the process of updating the model with a larger batch size using a single process.
+However, this equivalence doesn't hold in many practical scenarios.
+For example, the order of floating-number reduction
+$$
+\begin{aligned}
+(a+b)+c&=z_1 \\
+a+(b+c)&=z_2 \\
+|z_1-z_2|&\neq.0
+\end{aligned}
+$$
+can make a great difference, not to mention random modules such as Dropout.
+
+Therefore, DDP often offers an approximation of single-card training, instead of a strict equivalence.
+Fortunately, even this approximation is sufficient in practice and is widely adopted by the community.
+
+## Dataset for DDP
+
+As discussed before, different training processes should look at different partitions of the training data.
+If two processes share the same partition of data, allreduce approximates training the model on the same batch for two epochs, rather than training with a larger batch.
+
+Therefore, we need to include the batch partitioning logic within the dataset we use.
