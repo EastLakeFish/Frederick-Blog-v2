@@ -16,10 +16,6 @@ const files = computed(() => {
     .sort()
 })
 
-function fileIcon(file: string) {
-  if (file.endsWith('/')) return '📁'
-  return '📄'
-}
 </script>
 
 <template>

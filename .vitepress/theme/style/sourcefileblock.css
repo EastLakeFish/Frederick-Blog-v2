@@ -33,16 +33,22 @@ a.source-link {
   text-decoration: none;
 }
 
+.source-link span.same-line {
+  flex-direction: row;
+}
+
+.source-link span.icon {
+  margin-right: .7rem;
+  line-height: 1;
+  font-size: 1.1rem;
+}
+
 .source-link span.file {
   font-size: large;
   margin-bottom: .5rem;
   color: black;
   font-weight: bold;
   text-decoration: none;
-}
-
-.source-link span.file::before {
-  content: "📄 ";
 }
 
 .source-link span.desc {

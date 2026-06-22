@@ -132,9 +132,22 @@ can make a great difference, not to mention random modules such as Dropout.
 Therefore, DDP often offers an approximation of single-card training, instead of a strict equivalence.
 Fortunately, even this approximation is sufficient in practice and is widely adopted by the community.
 
-## Dataset for DDP
+## Loading ImageNet
 
 As discussed before, different training processes should look at different partitions of the training data.
 If two processes share the same partition of data, allreduce approximates training the model on the same batch for two epochs, rather than training with a larger batch.
 
 Therefore, we need to include the batch partitioning logic within the dataset we use.
+That is, suppose we have $N$ images and $P$ processes in total, each process should look at $N/P$.
+Since $N/P$ may not be integral, the actual image number processed by each process may differ.
+To deal with this case and make it convenient for cross-device synchronization, we force each process to share the same image count denoted by $N_p$:
+$$
+\tilde{N} = P \cdot (N // P), \quad N_p = \tilde{N} / P,
+$$
+where $a//b$ takes the integral part of $a/b$.
+
+<SourceFileCard
+href="machine-learning/parallel-training/efficient_imagenet_ddp.py"
+desc="Efficient ImageNet dataset (parallel version)."
+/>
+

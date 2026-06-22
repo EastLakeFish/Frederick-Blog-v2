@@ -24,6 +24,7 @@ import { setupLightbox } from './components/lightbox.ts'
 import References from './components/reference.vue'
 import SourceIndex from './components/sourceindex.vue'
 import SourceFile from './components/sourcefile.vue'
+import SourceFileCard from './components/sourcefilecard.vue'
 import SourceViewer from './components/sourceviewer.vue'
 
 export default {
@@ -44,6 +45,7 @@ export default {
     app.component('References', References)
     app.component('SourceIndex', SourceIndex)
     app.component('SourceFile', SourceFile)
+    app.component('SourceFileCard', SourceFileCard)
     app.component('SourceViewer', SourceViewer)
   },
 

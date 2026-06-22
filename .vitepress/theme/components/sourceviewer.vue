@@ -90,6 +90,7 @@ function goBack() {
         You are previewing <code>{{ normalizedFile }}</code>.<br>
         Download it
         <a :href="downloadHref" :download="filename">here</a>.
+        You can check out <a href="/license">license</a> here.
       </p>
 
       <p v-else>

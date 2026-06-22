@@ -97,7 +97,7 @@ The results are shown as follows:
 
 ## Source Files
 
-<a href="/docs/source/?file=machine-learning/efficient-imagenet/efficient_imagenet.py" class="source-link">
-<span class="file">efficient_imagenet.py</span>
-<span class="desc">An efficient ImageNet dataset for sharded data (single-card training).</span>
-</a>
+<SourceFileCard 
+href="machine-learning/efficient-imagenet/efficient_imagenet.py"
+desc="An efficient ImageNet dataset for sharded data (single-card training)."
+/>

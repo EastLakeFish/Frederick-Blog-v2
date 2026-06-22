@@ -205,12 +205,12 @@ On SSD, the script takes approximately 30 seconds to shuffle the sharded data us
 
 ## Source Files
 
-<a href="/docs/source/?file=machine-learning/sharding-imagenet/sharder.py" class="source-link">
-<span class="file">sharder.py</span>
-<span class="desc">ImageNet sharding pipeline implementation.</span>
-</a>
+<SourceFileCard
+href="machine-learning/sharding-imagenet/sharder.py"
+desc="ImageNet sharding pipeline implementation."
+/>
 
-<a href="/docs/source/?file=machine-learning/sharding-imagenet/shuffle.py" class="source-link">
-<span class="file">shuffle.py</span>
-<span class="desc">A shuffler for sharded ImageNet data.</span>
-</a>
+<SourceFileCard
+href="machine-learning/sharding-imagenet/shuffle.py"
+desc="A shuffler for sharded ImageNet data."
+/>

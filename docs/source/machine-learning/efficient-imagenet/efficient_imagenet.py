@@ -20,6 +20,7 @@ See https://eastlakefish.com/license.html.
 
 from __future__ import annotations
 
+import io
 import multiprocessing as mp
 import sys
 import tarfile
@@ -89,7 +90,7 @@ class EfficientImageNet(Dataset):
         shards: dict[str, list[Path]],
         num_workers: int,
         img_suffixes: Sequence[str] = DEFAULT_IMAGE_SUFFIXES,
-    ) -> None:
+    ) -> dict[str, list[dict]]:
         results = {}
         for split, shard_list in shards.items():
             results[split], total = [], len(shard_list)
@@ -130,19 +131,22 @@ class EfficientImageNet(Dataset):
     def split(self) -> str:
         return "train" if self.__train__ else "val"
     
-    def __getitem__(self, item: int) -> tuple[Tensor, Tensor]:
+    @staticmethod
+    def _process_getitem(imgs: list[dict], item: int, decode_mode: str) -> tuple[Tensor, Tensor]:
         # per worker
         # world_size=1
-        if item >= len(self.imgs[self.split]):
+        if item >= len(imgs):
             raise IndexError(f"Index {item} out of range.")
-        img_meta = self.imgs[self.split][item]
+        img_meta = imgs[item]
         label = torch.as_tensor(int(img_meta["label"]), dtype=torch.long)
         with open(img_meta["shard"], "rb") as f:
             f.seek(img_meta["offset"])
-            img_bytes = f.read(img_meta["size"])
-        buf = torch.frombuffer(img_bytes, dtype=torch.uint8)
-        img = decode_image(buf, mode=self.decode_mode)
+            img_buf = torch.frombuffer(bytearray(f.read(img_meta["size"])), dtype=torch.uint8)
+        img = decode_image(img_buf, mode=decode_mode)
         return img, label
+    
+    def __getitem__(self, item: int) -> tuple[Tensor, Tensor]:
+        return self._process_getitem(self.imgs[self.split], item, self.decode_mode)
     
     def __len__(self) -> int:
         return len(self.imgs[self.split])
@@ -211,5 +215,5 @@ def benchmark_dataloader(
     
     
 if __name__ == "__main__":
-    dataset = EfficientImageNet(root="./imagenet12")
+    dataset = EfficientImageNet(root=r"F:\ResearchProjects\Datasets\ImageNet\compressed_batch=10000")
     benchmark_dataloader(dataset.train)
