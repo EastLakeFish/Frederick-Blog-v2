@@ -28,13 +28,14 @@ import time
 from functools import partial
 from pathlib import Path
 from tqdm import tqdm
-from typing import Iterator, Sequence
+from typing import Iterator, Literal, Sequence
 
 import torch
 from torch import Tensor
 from torch.utils.data import Dataset, DataLoader
 
 from torchvision.io import decode_image
+from torchvision.transforms.v2 import Compose
 
 DEFAULT_IMAGE_SUFFIXES = ("jpg", "jpeg", "JPEG", "png", "PNG")
 tqdm = partial(tqdm, file=sys.stdout)
@@ -47,24 +48,34 @@ def split_list(lst: list, n: int) -> list[list]:
 class EfficientImageNet(Dataset):
     def __init__(self,
         root: str | Path,
+        split: Literal["train", "val"],
+        transform: Compose | None = None,
+        device: str | torch.device = "cpu",
         *,
         num_workers: int = 8,
         img_suffixes: Sequence[str] = DEFAULT_IMAGE_SUFFIXES,
         decode_mode: str = "RGB",
     ) -> None:
         super().__init__()
-        self.root = Path(root)
-        self.shards = self.list_shards(self.root)
+        self.root = Path(root).expanduser()
+        self.split = split
+        self.shards = self.list_shards()
+        if len(self.shards) == 0:
+            raise FileNotFoundError("No shards found.")
         self.num_workers = min(num_workers, mp.cpu_count())
         self.decode_mode = decode_mode
+        self.device = torch.device(device)
+        
+        try:
+            _ = torch.randn(1).to(self.device)
+        except Exception:
+            raise
         
         self.imgs = self.inspect_imgs(self.shards, self.num_workers, img_suffixes)
-        self.__train__ = True
+        self.transform = transform
     
-    @staticmethod
-    def list_shards(root: str | Path) -> None:
-        root = Path(root)
-        return {split: list((root / split).glob("shard_*.tar")) for split in ("train", "val")}
+    def list_shards(self) -> list[Path]:
+        return list((self.root / self.split).glob("shard_*.tar"))
     
     @staticmethod
     def inspect_worker(shard_list: list[Path], img_suffixes: Sequence[str], output_queue: mp.Queue) -> None:
@@ -84,54 +95,43 @@ class EfficientImageNet(Dataset):
             finally:
                 output_queue.put(None)
 
-    @classmethod
-    def inspect_imgs(cls,
-        shards: dict[str, list[Path]],
+    def inspect_imgs(self,
+        shards: list[Path],
         num_workers: int,
         img_suffixes: Sequence[str] = DEFAULT_IMAGE_SUFFIXES,
-    ) -> dict[str, list[dict]]:
-        results = {}
-        for split, shard_list in shards.items():
-            results[split], total = [], len(shard_list)
-            num_workers = min(num_workers, len(shard_list))
-            pbar = tqdm(total=total, desc=f"Caching {split}")
-            shard_batches = split_list(shard_list, num_workers)
-            queue = mp.Queue(maxsize=20 * num_workers)
+    ) -> list[dict]:
+        results, total = [], len(shards)
+        num_workers = min(num_workers, len(shards))
+        pbar = tqdm(total=total, desc=f"Caching {self.split}")
+        shard_batches = split_list(shards, num_workers)
+        queue = mp.Queue(maxsize=20 * num_workers)
+        
+        workers = [mp.Process(target=self.inspect_worker, args=(batch, img_suffixes, queue)) for batch in shard_batches]
+        for w in workers:
+            w.start()
+        
+        finished = 0
+        while finished < total:
+            flag = queue.get()
+            if flag is None:
+                finished += 1
+                pbar.update()
+            else:
+                results.append(flag)
             
-            workers = [mp.Process(target=cls.inspect_worker, args=(batch, img_suffixes, queue)) for batch in shard_batches]
-            for w in workers:
-                w.start()
-            
-            finished = 0
-            while finished < total:
-                flag = queue.get()
-                if flag is None:
-                    finished += 1
-                    pbar.update()
-                else:
-                    results[split].append(flag)
-                
-            for w in workers:
-                w.join()
+        for w in workers:
+            w.join()
         
         return results
     
-    @property
-    def train(self) -> EfficientImageNet:
-        self.__train__ = True
-        return self
-    
-    @property
-    def val(self) -> EfficientImageNet:
-        self.__train__ = False
-        return self
-    
-    @property
-    def split(self) -> str:
-        return "train" if self.__train__ else "val"
-    
     @staticmethod
-    def _process_getitem(imgs: list[dict], item: int, decode_mode: str) -> tuple[Tensor, Tensor]:
+    def _process_getitem(
+        imgs: list[dict], 
+        item: int, 
+        decode_mode: str, 
+        transform: Compose | None = None,
+        device: str | torch.device = "cpu",
+    ) -> tuple[Tensor, Tensor]:
         # per worker
         # world_size=1
         if item >= len(imgs):
@@ -141,14 +141,16 @@ class EfficientImageNet(Dataset):
         with open(img_meta["shard"], "rb") as f:
             f.seek(img_meta["offset"])
             img_buf = torch.frombuffer(bytearray(f.read(img_meta["size"])), dtype=torch.uint8)
-        img = decode_image(img_buf, mode=decode_mode)
+        img = decode_image(img_buf, mode=decode_mode).to(device)  # type: ignore
+        if transform:
+            img = transform(img)
         return img, label
     
     def __getitem__(self, item: int) -> tuple[Tensor, Tensor]:
-        return self._process_getitem(self.imgs[self.split], item, self.decode_mode)
+        return self._process_getitem(self.imgs, item, self.decode_mode, self.transform, self.device)
     
     def __len__(self) -> int:
-        return len(self.imgs[self.split])
+        return len(self.imgs)
     
     def __iter__(self) -> Iterator[tuple[Tensor, Tensor]]:  # for debug
         index = 0
@@ -168,7 +170,7 @@ def benchmark_dataloader(
     num_workers: int = 8,
     warmup_batches: int = 10,
     benchmark_batches: int = 500,
-) -> None:
+) -> dict:
     loader = DataLoader(
         dataset,
         batch_size=batch_size,
@@ -214,5 +216,5 @@ def benchmark_dataloader(
     
     
 if __name__ == "__main__":
-    dataset = EfficientImageNet(root=r"F:\ResearchProjects\Datasets\ImageNet\compressed_batch=10000")
-    benchmark_dataloader(dataset.train)
+    dataset = EfficientImageNet(root=r"~/LinuxDatasets/imagenet12/compressed", split="train")
+    benchmark_dataloader(dataset)
