@@ -38,6 +38,10 @@ Intuitively, they describes processes:
 processes = (Process(target=fn) for rank in range(world_size))
 ```
 
+PyTorch also defines **nodes**, which are generally physical or conceptual devices.
+For example, when training the same model on three servers, the node count is 3.
+And if each server possesses two graphics cards, then the world size becomes $3\times2=6$.
+
 ### Allreduce
 
 In distributed systems, **reduce** refers to the process of aggregating data scattered across multiple computers or nodes into a single result, which is then synchronized to specific targets (e.g., node with some rank).
@@ -151,3 +155,39 @@ href="machine-learning/parallel-training/efficient_imagenet_ddp.py"
 desc="Efficient ImageNet dataset (parallel version)."
 />
 
+This dataset can be loaded with the default `DataLoader` in PyTorch.
+
+## Run Parallel Training
+
+`torchrun` is an alias for `python -m torch.distributed.run`, which establishes an stable environment for parallel training by assigning necessary environmental variables (see <a href="https://docs.pytorch.org/docs/2.12/elastic/run.html#environment-variables" target="_blank">official docs</a>), spawning training processes and managing their communications (through rendezvous mechanism).
+
+Since `torchrun` already manages environmental variables, subprocesses can access them without defining them in advance:
+```python
+import os
+import torch
+import torch.distributed as dist
+
+def init_process() -> int:
+    local_rank = int(os.environ["LOCAL_RANK"])
+    torch.cuda.set_device(local_rank)
+    dist.init_process_group("nccl")  # use gloo on Windows
+    return local_rank
+
+def cleanup() -> None:
+    if dist.is_initialized():
+        dist.destroy_process_group()
+
+if __name__ == "__main__":
+    print(f"Local rank: {init_process()}")
+    cleanup()
+```
+
+Results:
+
+```text
+# torchrun --nproc-per-node=2 torchrun_example.py
+Local rank: 0
+Local rank: 1
+```
+
+`--nproc-per-node` specifies the process count in each node (by default, the node count is 1, which can be adjusted by `--nnodes`).

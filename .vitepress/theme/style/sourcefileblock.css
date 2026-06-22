@@ -56,3 +56,7 @@ a.source-link {
   color: var(--vp-c-text-2);
   text-decoration: none;
 }
+
+.dark .source-link span.file {
+  color: white;
+}

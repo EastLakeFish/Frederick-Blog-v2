@@ -20,7 +20,6 @@ See https://eastlakefish.com/license.html.
 
 from __future__ import annotations
 
-import io
 import multiprocessing as mp
 import sys
 import tarfile
