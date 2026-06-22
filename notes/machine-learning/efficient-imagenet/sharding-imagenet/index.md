@@ -24,13 +24,9 @@ references:
 :::info **This article belongs to series** [*Efficient ImageNet*](/notes/machine-learning/index)
 :::
 
-<div class="update-notes">
-  <h1>Update Notes</h1>
-  <div class="update-note">
-    <span class="date">2026-06-15</span>
-    <span class="message">Caching and encoding labels in filenames.</span>
-  </div>
-</div>
+<UpdateNotes :history="{
+    '2026-06-15': 'Caching and encoding labels in filenames.',
+}"/>
 
 ImageNet has been one of the standard benchmark datasets that are frequently used in computer vision tasks.
 However, it is also notorious for its size - over one million training samples, taking up approximately 140-160GB of storage.

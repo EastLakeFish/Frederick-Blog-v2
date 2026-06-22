@@ -20,6 +20,10 @@ next: {
 :::info **This article belongs to series** [*Efficient ImageNet*](/notes/machine-learning/index)
 :::
 
+<UpdateNotes :history="{
+    '2026-06-22': 'Added bytearray to suppress PyTorch warning.'
+}"/>
+
 While sharding makes it efficient to stream data from a large dataset, the implementation, especially for reshuffling before each epoch starts, becomes very complex.
 This is because we have to avoid random seeking in the shards, as it generally takes longer than directly reading files from the filesystem.
 To improve efficiency, we can also consider a pre-indexing approach where we use multiple processes to scan the shards, and build up a map between the important metadata and actually offsets of the data.

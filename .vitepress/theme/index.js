@@ -26,6 +26,7 @@ import SourceIndex from './components/sourceindex.vue'
 import SourceFile from './components/sourcefile.vue'
 import SourceFileCard from './components/sourcefilecard.vue'
 import SourceViewer from './components/sourceviewer.vue'
+import UpdateNotes from './components/update-notes.vue'
 
 export default {
 
@@ -47,6 +48,7 @@ export default {
     app.component('SourceFile', SourceFile)
     app.component('SourceFileCard', SourceFileCard)
     app.component('SourceViewer', SourceViewer)
+    app.component('UpdateNotes', UpdateNotes)
   },
 
 }
