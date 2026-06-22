@@ -132,15 +132,6 @@ def get_loaders(args: argparse.Namespace) -> tuple[DataLoader, DataLoader]:
         num_workers=args.num_workers,
     )
     
-    min_label, max_label = 1000, 0
-    
-    for _, label in dataset(split="val"):
-        min_label = min(min_label, label)
-        max_label = max(max_label, label)
-    
-    print(f"Label range: {min_label}-{max_label}")
-    exit()
-    
     loader = partial(DataLoader,
         batch_size=args.batch_size,
         num_workers=args.num_workers,

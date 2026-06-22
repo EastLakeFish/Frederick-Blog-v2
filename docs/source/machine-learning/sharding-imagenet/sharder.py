@@ -139,10 +139,10 @@ class ImageNetSharder:
         with tarfile.open(train_tar, "r") as tar:
             return {wnid: label for label, wnid in enumerate(sorted(
                 mem.name.split(".")[0] for mem in tar.getmembers() if (mem.isfile() and mem.name.endswith(".tar"))
-            ))}
+            ))}  # range 0-999
     
     def _val_filename2label(self) -> dict:
-        return {k: label for k, label in zip(sorted(item["name"] for item in self.meta["val"]), self.val_gt)}
+        return {k: label - 1 for k, label in zip(sorted(item["name"] for item in self.meta["val"]), self.val_gt)}  # use range 0-999
     
     def inspect(self) -> dict:
         def _inspect(tar) -> list:
