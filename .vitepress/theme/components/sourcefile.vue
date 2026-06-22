@@ -71,22 +71,34 @@ const visibleSource = computed(() => {
 })
 
 const html = ref('')
+const isLoading = ref(false)
 
 watchEffect(async () => {
   if (!visibleSource.value) {
     html.value = ''
+    isLoading.value = false
     return
   }
 
-  html.value = await codeToHtml(visibleSource.value, {
-    lang: resolvedLang.value,
-    theme: isDark.value ? 'github-dark' : 'github-light'
-  })
+  isLoading.value = true
+  try {
+    html.value = await codeToHtml(visibleSource.value, {
+      lang: resolvedLang.value,
+      theme: isDark.value ? 'github-dark' : 'github-light'
+    })
+  } finally {
+    isLoading.value = false
+  }
 })
 </script>
 
 <template>
-  <div v-if="resolvedSource" class="source-file">
+  <div v-if="resolvedSource && isLoading" class="source-file-loading">
+    <div class="spinner"></div>
+    <p>Parsing source file: <code>{{ resolvedTitle }}</code>...</p>
+  </div>
+
+  <div v-else-if="resolvedSource && !isLoading" class="source-file">
     <div class="source-file-header">
       <span class="source-file-title">{{ resolvedTitle }}</span>
       <span class="source-file-meta">{{ resolvedLang }}</span>
@@ -99,3 +111,42 @@ watchEffect(async () => {
     Source file not found: <code>{{ normalizedFile }}</code>
   </div>
 </template>
+
+<style scoped>
+.source-file-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  
+  margin: 1rem 0;
+  padding: 3rem 1rem;
+  
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-2);
+}
+
+.source-file-loading p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* --- CSS Spinner Animation --- */
+.spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid var(--vp-c-divider);
+  border-top-color: var(--vp-c-brand-1);
+  border-radius: 20%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>
