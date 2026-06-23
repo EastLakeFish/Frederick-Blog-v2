@@ -111,6 +111,8 @@ We test the script on NVIDIA RTX PRO 5000 Blackwell, training MobileNetV3-Large 
 The average time consumption of each epoch is 9 minutes (excluding the first epoch), with an average GPU usage of 96.7%.
 The script is attached in the <a href="#source-files">Source Files</a> section.
 
+Recommended settings (32GB RAM; 24GB GPU MEM): prefetch-factor=2, num-workers=4, batch-size=320.
+
 ## Source Files
 
 <SourceFileCard 

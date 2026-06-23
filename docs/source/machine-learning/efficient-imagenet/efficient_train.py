@@ -360,7 +360,9 @@ def main() -> None:
         with timer:
             for epoch_id in range(runtime.epochs):
                 train_result = train_one_epoch(runtime, train_loader)
+                logger.info(train_result.report())
                 val_result = val_one_epoch(runtime, val_loader)
+                logger.info(val_result.report())
                 log_results(train_result, val_result)
                 runtime.finish_epoch(val_result.metrics["top-1"])
                 logger.info(f"[INFO] Epoch {epoch_id} finished. Elapsed time: {timer.value_min:.2f} minutes.")
