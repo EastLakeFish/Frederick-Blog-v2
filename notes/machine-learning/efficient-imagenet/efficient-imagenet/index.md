@@ -22,7 +22,8 @@ next: {
 
 <UpdateNotes :history="{
     '2026-06-22-1': 'Add bytearray to suppress PyTorch warning.',
-    '2026-06-22-2': 'Add explicit split control in __init__.'
+    '2026-06-22-2': 'Add explicit split control in __init__.',
+    '2026-06-23': 'Add training benchmark statistics.',
 }"/>
 
 While sharding makes it efficient to stream data from a large dataset, the implementation, especially for reshuffling before each epoch starts, becomes very complex.
@@ -100,9 +101,24 @@ The results are shown as follows:
 |-|-|-|-|
 |256|21112.03|82.47|0.047ms/sample|
 
+## Training
+
+Based on Efficient ImageNet dataset, we also implement a high-performance script for single-card training tasks.
+It provides verbose logging, checkpoint saving and extensible, modular design (e.g., a `default_parser` provided by the user).
+It also supports rich command-line arguments, including dataset worker number, prefetch factor and random seeds.
+
+We test the script on NVIDIA RTX PRO 5000 Blackwell, training MobileNetV3-Large for 350 epochs.
+The average time consumption of each epoch is 9 minutes (excluding the first epoch), with an average GPU usage of 96.7%.
+The script is attached in the <a href="#source-files">Source Files</a> section.
+
 ## Source Files
 
 <SourceFileCard 
 href="machine-learning/efficient-imagenet/efficient_imagenet.py"
 desc="An efficient ImageNet dataset for sharded data (single-card training)."
+/>
+
+<SourceFileCard
+href="machine-learning/efficient-imagenet/efficient_train.py"
+desc="A high-performance ImageNet training script based on Efficient ImageNet dataset."
 />

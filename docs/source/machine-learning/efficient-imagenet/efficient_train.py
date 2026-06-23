@@ -45,7 +45,7 @@ from _models import default_parser, select_model, NUM_CLASSES
 OPTIMIZER = torch.optim.Adam
 SCHEDULER = torch.optim.lr_scheduler.CosineAnnealingLR
 
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 6.25e-2
 LABEL_SMOOTHING = 1e-2
 log_dir = "./runs"
 
@@ -151,6 +151,7 @@ def get_args() -> argparse.Namespace:
     parser.add_argument("-d", "--dataset", type=str, required=True)
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("-e", "--epochs", type=int, default=300)
+    parser.add_argument("-lr", "--learning-rate", type=float, default=LEARNING_RATE)
     parser.add_argument("-w", "--num-workers", type=int, default=8)
     parser.add_argument("--prefetch-factor", type=int, default=2)
     parser.add_argument("--seed", type=int, default=42)
@@ -221,9 +222,13 @@ class Runtime:  # record runtime states
 
 
 def initialization(args: argparse.Namespace) -> Runtime:
+    # high-performance specifications
+    torch.backends.cudnn.benchmark = True
+    torch.set_float32_matmul_precision("high")
+    
     device = torch.device(args.device)
     model = select_model(args=args).to(device)
-    optimizer = OPTIMIZER(params=model.parameters(), lr=LEARNING_RATE)
+    optimizer = OPTIMIZER(params=model.parameters(), lr=args.learning_rate)
     
     return Runtime(
         args=args,
@@ -232,7 +237,11 @@ def initialization(args: argparse.Namespace) -> Runtime:
         device_type=device.type,
         epochs=args.epochs,
         loss_fn=torch.nn.CrossEntropyLoss(label_smoothing=LABEL_SMOOTHING),
-        autocast=torch.amp.autocast_mode.autocast(device_type=device.type, enabled=not args.no_autocast),
+        autocast=torch.amp.autocast(  # type: ignore
+            device_type=device.type,
+            enabled=not args.no_autocast,
+            dtype=torch.float16,
+        ),
         grad_scalar=torch.amp.grad_scaler.GradScaler(device=device.type, enabled=True),
         optimizer=optimizer,
         scheduler=SCHEDULER(optimizer, T_max=args.epochs),
