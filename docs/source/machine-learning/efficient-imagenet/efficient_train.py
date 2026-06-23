@@ -45,7 +45,7 @@ from _models import default_parser, select_model, NUM_CLASSES
 OPTIMIZER = torch.optim.Adam
 SCHEDULER = torch.optim.lr_scheduler.CosineAnnealingLR
 
-LEARNING_RATE = 6.25e-2
+LEARNING_RATE = 1e-3
 LABEL_SMOOTHING = 1e-2
 log_dir = "./runs"
 
@@ -63,8 +63,8 @@ def init_logger() -> None:
     
     
 class Timer:
-    def __init__(self, device: str | torch.device) -> None:
-        self.on_cuda = str(device) != "cpu"
+    def __init__(self, device_type: str | torch.device) -> None:
+        self.on_cuda = str(device_type) != "cpu"
         self.start_event = None
         self._value = None
         
@@ -184,8 +184,8 @@ class Runtime:  # record runtime states
     device_type: str
     grad_scalar: torch.amp.grad_scaler.GradScaler
     loss_fn: nn.Module
-    optimizer: torch.optim.Optimizer
-    scheduler: torch.optim.lr_scheduler.LRScheduler
+    optimizer_type: partial[torch.optim.Optimizer]
+    scheduler_type: partial[torch.optim.lr_scheduler.LRScheduler]
     
     # metrics
     metrics: torchmetrics.MetricCollection
@@ -193,11 +193,15 @@ class Runtime:  # record runtime states
     # status
     epochs: int
     epoch_id: int = 0
+    optimizer: torch.optim.Optimizer = None  # type: ignore
+    scheduler: torch.optim.lr_scheduler.LRScheduler = None  # type: ignore
     best_acc: float | None = None
     _legacy_ckpt_label: str | None = None
     
     def __post_init__(self) -> None:
-        setattr(self, "best_acc", -1)
+        self.best_acc = -1
+        self.optimizer = self.optimizer_type(params=self.model.parameters())  # type: ignore
+        self.scheduler = self.scheduler_type(self.optimizer)
     
     def clear_metrics(self) -> None:
         self.metrics.reset()
@@ -228,7 +232,6 @@ def initialization(args: argparse.Namespace) -> Runtime:
     
     device = torch.device(args.device)
     model = select_model(args=args).to(device)
-    optimizer = OPTIMIZER(params=model.parameters(), lr=args.learning_rate)
     
     return Runtime(
         args=args,
@@ -243,8 +246,8 @@ def initialization(args: argparse.Namespace) -> Runtime:
             dtype=torch.float16,
         ),
         grad_scalar=torch.amp.grad_scaler.GradScaler(device=device.type, enabled=True),
-        optimizer=optimizer,
-        scheduler=SCHEDULER(optimizer, T_max=args.epochs),
+        optimizer_type=partial(OPTIMIZER, lr=args.learning_rate),
+        scheduler_type=partial(SCHEDULER, T_max=args.epochs),
         metrics=torchmetrics.MetricCollection({
             "top-1": MulticlassAccuracy(num_classes=NUM_CLASSES, top_k=1),
             "top-5": MulticlassAccuracy(num_classes=NUM_CLASSES, top_k=5),
@@ -278,7 +281,7 @@ class Result:
         
     def report(self) -> str:
         return (
-            f"Elapsed: {self.elapsed_time_min:.2f}min | "
+            f"[INFO] [{self.type.upper()}] Elapsed: {self.elapsed_time_min:.2f}min | "
             + " | ".join(f"{key[0].capitalize() + key[1:]}: {item:.4f}" for key, item in self.metrics.items())
         )
     
@@ -291,18 +294,22 @@ def train_one_epoch(state: Runtime, loader: DataLoader) -> Result:
     timer = Timer(state.device_type)
     
     with timer:
-        for features, labels in tqdm(loader, desc=f"[Train] Epoch {state.epoch_id}"):
-            features, labels = features.to(state.device, non_blocking=True), labels.to(state.device, non_blocking=True)
-            state.optimizer.zero_grad()
-            with state.autocast:
-                logits = state.model(features)
-                loss = state.loss_fn(logits, labels)
-            state.grad_scalar.scale(loss).backward()
-            state.grad_scalar.step(state.optimizer)
-            state.grad_scalar.update()
-            state.metrics.update(logits, labels)
-            
-        state.scheduler.step()
+        with tqdm(loader, desc=f"[Train] Epoch {state.epoch_id}") as pbar:
+            for features, labels in pbar:
+                features, labels = features.to(state.device, non_blocking=True), labels.to(state.device, non_blocking=True)
+                state.optimizer.zero_grad()
+                with state.autocast:
+                    logits = state.model(features)
+                    loss = state.loss_fn(logits, labels)
+                state.grad_scalar.scale(loss).backward()
+                state.grad_scalar.step(state.optimizer)
+                state.grad_scalar.update()
+                state.metrics.update(logits, labels)
+                
+                metrics = state.metrics.compute()
+                pbar.set_postfix({k: v.item() if isinstance(v, Tensor) else v for k, v in metrics.items()})
+                
+            state.scheduler.step()
     
     return Result(
         type="train",
