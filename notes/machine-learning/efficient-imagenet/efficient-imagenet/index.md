@@ -15,7 +15,7 @@ next: {
 
 # Efficient ImageNet
 
-*Created on June 15, 2026*
+*Created on June 15, 2026.*
 
 :::info **This article belongs to series** [*Efficient ImageNet*](/notes/machine-learning/index)
 :::

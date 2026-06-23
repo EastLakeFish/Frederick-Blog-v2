@@ -13,6 +13,8 @@ next: false
 
 # Parallel Training with PyTorch
 
+*Created on June 20, 2026.*
+
 :::info **This article belongs to series** [*Efficient ImageNet*](/notes/machine-learning/index)
 :::
 
