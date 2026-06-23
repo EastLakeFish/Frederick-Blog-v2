@@ -102,8 +102,8 @@ if __name__ == "__main__":
         dist.init_process_group(backend=backend, rank=args.rank, world_size=args.world_size)
     
     try:
-        dataset = EfficientImageNetDDP(root=r"F:\ResearchProjects\Datasets\ImageNet\compressed_batch=10000")
-        benchmark_dataloader(dataset.train)
+        dataset = EfficientImageNetDDP(root=r"F:\ResearchProjects\Datasets\ImageNet\compressed_batch=10000", split="train")
+        benchmark_dataloader(dataset)
     finally:
         if dist.is_initialized():
             dist.destroy_process_group()

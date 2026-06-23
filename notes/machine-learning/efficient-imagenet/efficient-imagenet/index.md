@@ -22,7 +22,7 @@ next: {
 
 <UpdateNotes :history="{
     '2026-06-22-1': 'Add bytearray to suppress PyTorch warning.',
-    '2026-06-22-2': 'Separate train & val logic.'
+    '2026-06-22-2': 'Add explicit split control in __init__.'
 }"/>
 
 While sharding makes it efficient to stream data from a large dataset, the implementation, especially for reshuffling before each epoch starts, becomes very complex.

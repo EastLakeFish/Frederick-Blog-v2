@@ -61,14 +61,14 @@ def _worker_val(val_filename2label: dict, in_queue: Queue, out_queue: Queue) -> 
 
 
 def _collector(root: Path, batch_size: int, img_queue: Queue, total: int) -> None:
-    def sharder(c: int) -> str:
+    def sharder_filename(c: int) -> Path:
         return root / f"shard_{c}.tar"
     
     root.mkdir(parents=True, exist_ok=True)
     
     shard_id, shard_counter = 0, 0
     pbar = tqdm(total=total, desc="Processing")
-    target_tar = tarfile.open(sharder(shard_id), "w|")
+    target_tar = tarfile.open(sharder_filename(shard_id), "w|")
     try:
         while True:
             d = img_queue.get()
@@ -86,7 +86,7 @@ def _collector(root: Path, batch_size: int, img_queue: Queue, total: int) -> Non
                 shard_id += 1
                 shard_counter = 0
                 target_tar.close()
-                target_tar = tarfile.open(sharder(shard_id), "w|")
+                target_tar = tarfile.open(sharder_filename(shard_id), "w|")
             else:
                 shard_counter += 1
             pbar.update()
@@ -132,7 +132,7 @@ class ImageNetSharder:
     def load_devkit(path: Path) -> list[int]:
         with tarfile.open(path, "r:gz") as tar:
             tarinfo = tar.getmember("ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt")
-            return [int(line.strip()) for line in tar.extractfile(tarinfo).read().decode("utf-8").splitlines()]
+            return [int(line.strip()) for line in tar.extractfile(tarinfo).read().decode("utf-8").splitlines()]  # type: ignore
     
     @staticmethod
     def _wnid2label(train_tar: Path) -> dict:
@@ -154,7 +154,7 @@ class ImageNetSharder:
                 } for member in tar.getmembers())
         return {k: _inspect(v) for k, v in self.paths.items()}
         
-    def _assign(self, split: str, queue: Queue) -> bytes:
+    def _assign(self, split: str, queue: Queue) -> None:
         with open(self.paths[split], "rb") as f:
             for meta in self.meta[split]:
                 f.seek(meta["offset"])

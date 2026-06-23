@@ -26,7 +26,7 @@ references:
 
 <UpdateNotes :history="{
     '2026-06-15': 'Caching and encoding labels in filenames.',
-    '2026-06-22': 'Update val label logic.'
+    '2026-06-22': 'Update val label logic (0-999).'
 }"/>
 
 ImageNet has been one of the standard benchmark datasets that are frequently used in computer vision tasks.
