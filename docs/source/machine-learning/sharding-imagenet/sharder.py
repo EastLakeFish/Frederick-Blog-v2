@@ -38,16 +38,24 @@ def _worker_train(wnid2label: dict, tar_queue: Queue, img_queue: Queue) -> None:
         d = tar_queue.get()
         if d is None:
             break
+
         tar_name, tar_bytes = d
-        tar_name = tar_name.split(".")[0]  # remove suffix
+        wnid = Path(tar_name).stem
+
         with tarfile.open(fileobj=io.BytesIO(tar_bytes), mode="r|") as tar:
-            while member := tar.next():  # JPEG
+            while member := tar.next():
+                if not member.isfile():
+                    continue
+
                 handler = tar.extractfile(member)
-                if handler:
-                    try:
-                        img_queue.put((wnid2label[tar_name], member.name, _process_img(handler.read())))
-                    except:
-                        continue
+                if handler is None:
+                    continue
+
+                img_queue.put((
+                    wnid2label[wnid],
+                    Path(member.name).name,
+                    _process_img(handler.read()),
+                ))
                     
                     
 def _worker_val(val_filename2label: dict, in_queue: Queue, out_queue: Queue) -> None:
@@ -111,7 +119,6 @@ class ImageNetSharder:
         num_workers: int = 8,
     ) -> None:
         self.paths = dict(train=Path(train_tar), val=Path(val_tar))
-        self.wnid2label = self._wnid2label(Path(train_tar))
         self.target = Path(target).expanduser()
         self.target.mkdir(parents=True, exist_ok=True)
         
@@ -120,6 +127,10 @@ class ImageNetSharder:
         self.num_workers = num_workers
         
         self.val_wnids, self.ilsvrc_id2wnid = self.load_devkit(Path(devkit_tar))
+        self.wnid2label = {
+            wnid: ilsvrc_id - 1
+            for ilsvrc_id, wnid in self.ilsvrc_id2wnid.items()
+        }
         self.val_filename2label = self._val_filename2label()
         
         train_wnids = set(self.wnid2label)
@@ -230,13 +241,6 @@ class ImageNetSharder:
             ) from exc
 
         return validation_wnids, ilsvrc_id2wnid
-    
-    @staticmethod
-    def _wnid2label(train_tar: Path) -> dict:
-        with tarfile.open(train_tar, "r") as tar:
-            return {wnid: label for label, wnid in enumerate(sorted(
-                mem.name.split(".")[0] for mem in tar.getmembers() if (mem.isfile() and mem.name.endswith(".tar"))
-            ))}  # range 0-999
     
     def _val_filename2label(self) -> dict[str, int]:
         result: dict[str, int] = {}

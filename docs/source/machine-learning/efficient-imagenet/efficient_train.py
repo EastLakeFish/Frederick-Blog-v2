@@ -324,12 +324,14 @@ def val_one_epoch(state: Runtime, loader: DataLoader) -> Result:
     timer = Timer(state.device_type)
     
     with timer:
-        with torch.no_grad():
+        with tqdm(loader, desc=f"[Val] Epoch {state.epoch_id}") as pbar:
             for features, labels in tqdm(loader, desc=f"[Val] Epoch {state.epoch_id}"):
                 features, labels = features.to(state.device, non_blocking=True), labels.to(state.device, non_blocking=True)
                 with state.autocast:
                     logits = state.model(features)
                 state.metrics.update(logits, labels)
+                metrics = state.metrics.compute()
+                pbar.set_postfix({k: v.item() if isinstance(v, Tensor) else v for k, v in metrics.items()})
     
     return Result(
         type="val",
@@ -363,19 +365,20 @@ def main() -> None:
     logger.info(f"Dataset cached. Elapsed time: {timer.value_s:.2f} seconds.")
     
     # traininig logic
+    timer.start()
     try:
-        with timer:
-            for epoch_id in range(runtime.epochs):
-                train_result = train_one_epoch(runtime, train_loader)
-                logger.info(train_result.report())
-                val_result = val_one_epoch(runtime, val_loader)
-                logger.info(val_result.report())
-                log_results(train_result, val_result)
-                runtime.finish_epoch(val_result.metrics["top-1"])
-                logger.info(f"[INFO] Epoch {epoch_id} finished. Elapsed time: {timer.value_min:.2f} minutes.")
+        for epoch_id in range(runtime.epochs):
+            train_result = train_one_epoch(runtime, train_loader)
+            logger.info(train_result.report())
+            val_result = val_one_epoch(runtime, val_loader)
+            logger.info(val_result.report())
+            log_results(train_result, val_result)
+            runtime.finish_epoch(val_result.metrics["top-1"])
+            logger.info(f"[INFO] Epoch {epoch_id} finished. Elapsed time: {timer.value_min:.2f} minutes.")
     except KeyboardInterrupt:
             logger.info("Program terminated by user.")
     finally:
+        timer.stop()
         logger.info(f"Program finished. Training took {timer.value_h:.2f} hours.")
 
 
