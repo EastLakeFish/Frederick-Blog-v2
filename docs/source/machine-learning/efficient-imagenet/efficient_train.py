@@ -275,8 +275,8 @@ def initialization(args: argparse.Namespace) -> Runtime:
         optimizer_type=optimizer_type,
         scheduler_type=partial(SCHEDULER, T_max=args.epochs),
         metrics=torchmetrics.MetricCollection({
-            "top-1": MulticlassAccuracy(num_classes=NUM_CLASSES, top_k=1),
-            "top-5": MulticlassAccuracy(num_classes=NUM_CLASSES, top_k=5),
+            "top-1": MulticlassAccuracy(num_classes=NUM_CLASSES, top_k=1, average="micro"),
+            "top-5": MulticlassAccuracy(num_classes=NUM_CLASSES, top_k=5, average="micro"),
             # "f1": MulticlassF1Score(num_classes=NUM_CLASSES),
             # "prec": MulticlassPrecision(num_classes=NUM_CLASSES),
             # "recall": MulticlassRecall(num_classes=NUM_CLASSES),
@@ -399,8 +399,8 @@ def main() -> None:
             logger.info(
                 f"[INFO] Epoch {epoch_id}: "
                 f"Optimizer={type(runtime.optimizer).__name__}, "
-                f"lr={runtime.optimizer.param_groups[0]['lr']}, "
-                f"weight_decay={args.weight_decay}"
+                f"lr={runtime.optimizer.param_groups[0]['lr']:.4f}, "
+                f"weight_decay={args.weight_decay:.4f}"
             )
             with epoch_timer:
                 train_result = train_one_epoch(runtime, train_loader)
