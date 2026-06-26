@@ -42,11 +42,13 @@ from _models import default_parser, select_model, NUM_CLASSES
 
 # ------ Preparation ------
 
-OPTIMIZER = torch.optim.Adam
+OPTIMIZER = torch.optim.SGD
 SCHEDULER = torch.optim.lr_scheduler.CosineAnnealingLR
 
-LEARNING_RATE = 1e-3
-LABEL_SMOOTHING = 1e-2
+LEARNING_RATE = None
+WEIGHT_DECAY = 1e-4
+LABEL_SMOOTHING = 0.1
+
 log_dir = "./runs"
 
 
@@ -63,13 +65,14 @@ def init_logger() -> None:
     
     
 class Timer:
-    def __init__(self, device_type: str | torch.device) -> None:
-        self.on_cuda = str(device_type) != "cpu"
+    def __init__(self, device_type: str | torch.device, disable_cuda_timer: bool = False) -> None:
+        self.on_cuda = str(device_type) != "cpu" and not disable_cuda_timer
         self.start_event = None
         self._value = None
         
     def start(self) -> None:
         self.start_event = None
+        self._value = None
         if self.on_cuda:
             self.start_event = torch.cuda.Event(enable_timing=True)
             self.start_event.record()
@@ -118,8 +121,15 @@ def get_loaders(args: argparse.Namespace) -> tuple[DataLoader, DataLoader]:
     imagenet_mean = (0.485, 0.456, 0.406)
     imagenet_std = (0.229, 0.224, 0.225)
 
-    transform = v2.Compose([
-        v2.Resize(256, interpolation=v2.InterpolationMode.BILINEAR),
+    train_transform = v2.Compose([
+        v2.RandomResizedCrop(224, scale=(0.08, 1.0)),
+        v2.RandomHorizontalFlip(),
+        v2.ToDtype(torch.float32, scale=True),
+        v2.Normalize(mean=imagenet_mean, std=imagenet_std),
+    ])
+
+    val_transform = v2.Compose([
+        v2.Resize(256),
         v2.CenterCrop(224),
         v2.ToDtype(torch.float32, scale=True),
         v2.Normalize(mean=imagenet_mean, std=imagenet_std),
@@ -128,7 +138,6 @@ def get_loaders(args: argparse.Namespace) -> tuple[DataLoader, DataLoader]:
     dataset = partial(EfficientImageNet,
         root=args.dataset,
         device="cpu",  # for pin_memory
-        transform=transform,
         num_workers=args.num_workers,
     )
     
@@ -140,8 +149,8 @@ def get_loaders(args: argparse.Namespace) -> tuple[DataLoader, DataLoader]:
         persistent_workers=not args.no_persistent_workers
     )
     
-    return (loader(dataset=dataset(split="train"), shuffle=True),
-            loader(dataset=dataset(split="val"), shuffle=False))
+    return (loader(dataset=dataset(split="train", transform=train_transform), shuffle=True),
+            loader(dataset=dataset(split="val", transform=val_transform), shuffle=False))
 
 
 def get_args() -> argparse.Namespace:
@@ -151,10 +160,14 @@ def get_args() -> argparse.Namespace:
     parser.add_argument("-d", "--dataset", type=str, required=True)
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("-e", "--epochs", type=int, default=300)
-    parser.add_argument("-lr", "--learning-rate", type=float, default=LEARNING_RATE)
     parser.add_argument("-w", "--num-workers", type=int, default=8)
     parser.add_argument("--prefetch-factor", type=int, default=2)
     parser.add_argument("--seed", type=int, default=42)
+    
+    # lr
+    parser.add_argument("-lr", "--learning-rate", type=float, default=None)
+    parser.add_argument("--momentum", type=float, default=0.9)
+    parser.add_argument("--weight-decay", type=float, default=1e-4)
     
     parser.add_argument("--no-autocast", action="store_true")
     parser.add_argument("--no-pin-memory", action="store_true")
@@ -184,7 +197,7 @@ class Runtime:  # record runtime states
     device_type: str
     grad_scalar: torch.amp.grad_scaler.GradScaler
     loss_fn: nn.Module
-    optimizer_type: partial[torch.optim.Optimizer]
+    optimizer_type: partial[torch.optim.Optimizer | Any]
     scheduler_type: partial[torch.optim.lr_scheduler.LRScheduler]
     
     # metrics
@@ -233,6 +246,19 @@ def initialization(args: argparse.Namespace) -> Runtime:
     device = torch.device(args.device)
     model = select_model(args=args).to(device)
     
+    # resolve lr
+    lr = args.learning_rate
+    if lr is None:
+        lr = 0.1 * args.batch_size / 256
+
+    optimizer_type=partial(
+        torch.optim.SGD,
+        lr=lr,
+        momentum=args.momentum,
+        weight_decay=args.weight_decay,
+        nesterov=True,
+    )
+    
     return Runtime(
         args=args,
         model=model,
@@ -246,7 +272,7 @@ def initialization(args: argparse.Namespace) -> Runtime:
             dtype=torch.float16,
         ),
         grad_scalar=torch.amp.grad_scaler.GradScaler(device=device.type, enabled=True),
-        optimizer_type=partial(OPTIMIZER, lr=args.learning_rate),
+        optimizer_type=optimizer_type,
         scheduler_type=partial(SCHEDULER, T_max=args.epochs),
         metrics=torchmetrics.MetricCollection({
             "top-1": MulticlassAccuracy(num_classes=NUM_CLASSES, top_k=1),
@@ -297,7 +323,7 @@ def train_one_epoch(state: Runtime, loader: DataLoader) -> Result:
         with tqdm(loader, desc=f"[Train] Epoch {state.epoch_id}") as pbar:
             for features, labels in pbar:
                 features, labels = features.to(state.device, non_blocking=True), labels.to(state.device, non_blocking=True)
-                state.optimizer.zero_grad()
+                state.optimizer.zero_grad(set_to_none=True)
                 with state.autocast:
                     logits = state.model(features)
                     loss = state.loss_fn(logits, labels)
@@ -323,15 +349,16 @@ def val_one_epoch(state: Runtime, loader: DataLoader) -> Result:
     state.clear_metrics()
     timer = Timer(state.device_type)
     
-    with timer:
-        with tqdm(loader, desc=f"[Val] Epoch {state.epoch_id}") as pbar:
-            for features, labels in tqdm(loader, desc=f"[Val] Epoch {state.epoch_id}"):
-                features, labels = features.to(state.device, non_blocking=True), labels.to(state.device, non_blocking=True)
-                with state.autocast:
-                    logits = state.model(features)
-                state.metrics.update(logits, labels)
-                metrics = state.metrics.compute()
-                pbar.set_postfix({k: v.item() if isinstance(v, Tensor) else v for k, v in metrics.items()})
+    with torch.inference_mode():
+        with timer:
+            with tqdm(loader, desc=f"[Val] Epoch {state.epoch_id}") as pbar:
+                for features, labels in pbar:
+                    features, labels = features.to(state.device, non_blocking=True), labels.to(state.device, non_blocking=True)
+                    with state.autocast:
+                        logits = state.model(features)
+                    state.metrics.update(logits, labels)
+                    metrics = state.metrics.compute()
+                    pbar.set_postfix({k: v.item() if isinstance(v, Tensor) else v for k, v in metrics.items()})
     
     return Result(
         type="val",
@@ -358,28 +385,39 @@ def main() -> None:
     seed(args)
     runtime = initialization(args)
     
-    timer = Timer(runtime.device_type)
+    global_timer = Timer(runtime.device_type, disable_cuda_timer=True)
     
-    with timer:
+    with global_timer:
         train_loader, val_loader = get_loaders(args)
-    logger.info(f"Dataset cached. Elapsed time: {timer.value_s:.2f} seconds.")
+    logger.info(f"Dataset cached. Elapsed time: {global_timer.value_s:.2f} seconds.")
     
     # traininig logic
-    timer.start()
+    global_timer.start()
     try:
         for epoch_id in range(runtime.epochs):
-            train_result = train_one_epoch(runtime, train_loader)
-            logger.info(train_result.report())
-            val_result = val_one_epoch(runtime, val_loader)
-            logger.info(val_result.report())
-            log_results(train_result, val_result)
-            runtime.finish_epoch(val_result.metrics["top-1"])
-            logger.info(f"[INFO] Epoch {epoch_id} finished. Elapsed time: {timer.value_min:.2f} minutes.")
+            epoch_timer = Timer(runtime.device_type)
+            logger.info(
+                f"[INFO] Epoch {epoch_id}: "
+                f"Optimizer={type(runtime.optimizer).__name__}, "
+                f"lr={runtime.optimizer.param_groups[0]['lr']}, "
+                f"weight_decay={args.weight_decay}"
+            )
+            with epoch_timer:
+                train_result = train_one_epoch(runtime, train_loader)
+                logger.info(train_result.report())
+                val_result = val_one_epoch(runtime, val_loader)
+                logger.info(val_result.report())
+                log_results(train_result, val_result)
+                runtime.finish_epoch(val_result.metrics["top-1"])
+            logger.info(
+                f"[INFO] Epoch {epoch_id} finished. "
+                f"Elapsed time: {epoch_timer.value_min:.2f} minutes."
+            )
     except KeyboardInterrupt:
-            logger.info("Program terminated by user.")
+        logger.info("Program terminated by user.")
     finally:
-        timer.stop()
-        logger.info(f"Program finished. Training took {timer.value_h:.2f} hours.")
+        global_timer.stop()
+        logger.info(f"Program finished. Training took {global_timer.value_h:.2f} hours.")
 
 
 if __name__ == "__main__":
