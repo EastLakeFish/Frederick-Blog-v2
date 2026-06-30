@@ -234,7 +234,9 @@ class Runtime:  # record runtime states
             
             # remove legacy checkpoint
             if self._legacy_ckpt_label is not None:
-                os.unlink(log_dir / self._gen_ckpt_filename(self._legacy_ckpt_label))  # type: ignore
+                old_ckpt = log_dir / self._gen_ckpt_filename(self._legacy_ckpt_label)  # type: ignore
+                if old_ckpt.is_file():
+                    os.unlink(old_ckpt)
             self._legacy_ckpt_label = ckpt_label
 
 
@@ -320,8 +322,8 @@ def train_one_epoch(state: Runtime, loader: DataLoader) -> Result:
     timer = Timer(state.device_type)
     
     with timer:
-        with tqdm(loader, desc=f"[Train] Epoch {state.epoch_id}") as pbar:
-            for features, labels in pbar:
+        with tqdm(enumerate(loader), desc=f"[Train] Epoch {state.epoch_id}") as pbar:
+            for step, (features, labels) in pbar:
                 features, labels = features.to(state.device, non_blocking=True), labels.to(state.device, non_blocking=True)
                 state.optimizer.zero_grad(set_to_none=True)
                 with state.autocast:
@@ -332,8 +334,9 @@ def train_one_epoch(state: Runtime, loader: DataLoader) -> Result:
                 state.grad_scalar.update()
                 state.metrics.update(logits, labels)
                 
-                metrics = state.metrics.compute()
-                pbar.set_postfix({k: v.item() if isinstance(v, Tensor) else v for k, v in metrics.items()})
+                if step % 50 == 0:
+                    metrics = state.metrics.compute()
+                    pbar.set_postfix({k: v.item() if isinstance(v, Tensor) else v for k, v in metrics.items()})
                 
             state.scheduler.step()
     
@@ -351,14 +354,16 @@ def val_one_epoch(state: Runtime, loader: DataLoader) -> Result:
     
     with torch.inference_mode():
         with timer:
-            with tqdm(loader, desc=f"[Val] Epoch {state.epoch_id}") as pbar:
-                for features, labels in pbar:
+            with tqdm(enumerate(loader), desc=f"[Val] Epoch {state.epoch_id}") as pbar:
+                for step, (features, labels) in pbar:
                     features, labels = features.to(state.device, non_blocking=True), labels.to(state.device, non_blocking=True)
                     with state.autocast:
                         logits = state.model(features)
                     state.metrics.update(logits, labels)
-                    metrics = state.metrics.compute()
-                    pbar.set_postfix({k: v.item() if isinstance(v, Tensor) else v for k, v in metrics.items()})
+                    
+                    if step % 50 == 0:
+                        metrics = state.metrics.compute()
+                        pbar.set_postfix({k: v.item() if isinstance(v, Tensor) else v for k, v in metrics.items()})
     
     return Result(
         type="val",

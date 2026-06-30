@@ -25,6 +25,7 @@ next: {
     '2026-06-22-2': 'Add explicit split control in __init__.',
     '2026-06-23': 'Add training benchmark statistics.',
     '2026-06-26': 'Add automatic LR and bug fixes.',
+    '2026-06-30': 'Robust fixes.'
 }"/>
 
 While sharding makes it efficient to stream data from a large dataset, the implementation, especially for reshuffling before each epoch starts, becomes very complex.
